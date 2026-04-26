@@ -5,7 +5,7 @@ import TaskItem from './TaskItem'
 import type { Todo } from '../db/types'
 
 export default function TaskListAllView() {
-  const { tasks, loadTasks } = useTaskStore()
+  const { tasks, loadTasks, toggleTask, selectedTaskIds = [] } = useTaskStore()
   const { lists } = useListStore()
 
   useEffect(() => {
@@ -48,11 +48,18 @@ export default function TaskListAllView() {
             <div className="flex flex-col gap-4 ml-5">
               {incompleteTasks.length > 0 && (
                 <ul role="list" className="space-y-3">
-                  {incompleteTasks.map(task => (
-                    <li key={task.id}>
-                      <TaskItem task={task} />
-                    </li>
-                  ))}
+                  {incompleteTasks.map(task => {
+                    const isSelected = selectedTaskIds.includes(task.id)
+                    return (
+                      <li key={task.id}>
+                        <TaskItem 
+                          task={task} 
+                          isSelected={isSelected}
+                          onToggleComplete={() => toggleTask(task.id)}
+                        />
+                      </li>
+                    )
+                  })}
                 </ul>
               )}
 
@@ -60,11 +67,18 @@ export default function TaskListAllView() {
                 <div className="pt-6 border-t border-[var(--color-border)]">
                   <h3 className="text-sm text-[var(--color-text-light)] mb-3 font-medium tracking-wide">已完成 ({completedTasks.length})</h3>
                   <ul role="list" className="space-y-2">
-                    {completedTasks.map(task => (
-                      <li key={task.id}>
-                        <TaskItem task={task} />
-                      </li>
-                    ))}
+                    {completedTasks.map(task => {
+                      const isSelected = selectedTaskIds.includes(task.id)
+                      return (
+                        <li key={task.id}>
+                          <TaskItem 
+                            task={task} 
+                            isSelected={isSelected}
+                            onToggleComplete={() => toggleTask(task.id)}
+                          />
+                        </li>
+                      )
+                    })}
                   </ul>
                 </div>
               )}

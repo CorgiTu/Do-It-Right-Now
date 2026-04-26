@@ -19,6 +19,9 @@ function SortableTaskItem({ task }: { task: Todo }) {
     isDragging,
   } = useSortable({ id: task.id })
 
+  const { toggleTask, selectedTaskIds = [] } = useTaskStore()
+  const isSelected = selectedTaskIds.includes(task.id)
+
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -29,7 +32,11 @@ function SortableTaskItem({ task }: { task: Todo }) {
 
   return (
     <li ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <TaskItem task={task} />
+      <TaskItem 
+        task={task} 
+        isSelected={isSelected}
+        onToggleComplete={() => toggleTask(task.id)}
+      />
     </li>
   )
 }

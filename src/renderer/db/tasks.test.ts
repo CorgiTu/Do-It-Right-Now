@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { initDB, createTask, getAllTasks, updateTask, deleteTask } from './tasks'
+import { initDB, createTask, getAllTasks, updateTask, deleteTask, deleteTasks } from './tasks'
 import type { Todo } from './types'
 
 describe('IndexedDB Data Layer', () => {
@@ -105,6 +105,52 @@ describe('IndexedDB Data Layer', () => {
       const tasks = await getAllTasks()
       expect(tasks).toHaveLength(1)
       expect(tasks[0].content).toBe('keep')
+    })
+  })
+
+  describe('deleteTasks', () => {
+    it('should delete multiple tasks by ids', async () => {
+      const task1 = await createTask({ content: 'task 1' })
+      const task2 = await createTask({ content: 'task 2' })
+      const task3 = await createTask({ content: 'task 3' })
+
+      const deletedCount = await deleteTasks([task1.id, task2.id, task3.id])
+
+      expect(deletedCount).toBe(3)
+      const tasks = await getAllTasks()
+      expect(tasks).toHaveLength(0)
+    })
+
+    it('should return 0 when deleting empty array', async () => {
+      const deletedCount = await deleteTasks([])
+      expect(deletedCount).toBe(0)
+    })
+
+    it('should only delete specified tasks and keep others', async () => {
+      const task1 = await createTask({ content: 'keep 1' })
+      const task2 = await createTask({ content: 'delete 1' })
+      const task3 = await createTask({ content: 'delete 2' })
+      const task4 = await createTask({ content: 'keep 2' })
+
+      const deletedCount = await deleteTasks([task2.id, task3.id])
+
+      expect(deletedCount).toBe(2)
+      const tasks = await getAllTasks()
+      expect(tasks).toHaveLength(2)
+      expect(tasks.map(t => t.content)).toContain('keep 1')
+      expect(tasks.map(t => t.content)).toContain('keep 2')
+    })
+
+    it('should handle non-existent ids gracefully', async () => {
+      const task1 = await createTask({ content: 'task 1' })
+      await createTask({ content: 'task 2' })
+
+      const deletedCount = await deleteTasks([task1.id, 'non-existent-id'])
+
+      expect(deletedCount).toBe(1)
+      const tasks = await getAllTasks()
+      expect(tasks).toHaveLength(1)
+      expect(tasks[0].content).toBe('task 2')
     })
   })
 })

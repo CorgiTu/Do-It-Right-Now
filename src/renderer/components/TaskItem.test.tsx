@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import TaskItem from './TaskItem'
 import type { Todo } from '../db/types'
+import { useTaskStore } from '../store/taskStore'
 
 const mockTask: Todo = {
   id: 'test-id',
@@ -16,15 +17,18 @@ const mockTask: Todo = {
 }
 
 const mockToggleTask = vi.fn()
+const mockToggleTaskSelection = vi.fn()
 const mockDeleteTask = vi.fn()
 const mockUpdateTaskContent = vi.fn()
 
 vi.mock('../store/taskStore', () => ({
-  useTaskStore: () => ({
+  useTaskStore: vi.fn(() => ({
     toggleTask: mockToggleTask,
+    toggleTaskSelection: mockToggleTaskSelection,
     deleteTask: mockDeleteTask,
     updateTaskContent: mockUpdateTaskContent,
-  }),
+    selectedTaskIds: [],
+  })),
 }))
 
 describe('TaskItem', () => {
@@ -46,20 +50,19 @@ describe('TaskItem', () => {
     expect(checkbox.checked).toBe(false)
   })
 
-  it('should show checkbox checked for completed task', () => {
-    const completedTask = { ...mockTask, completed: true }
-    render(<TaskItem task={completedTask} />)
+  it('should show checkbox unchecked when task is not selected', () => {
+    render(<TaskItem task={mockTask} />)
 
     const checkbox = screen.getByRole('checkbox') as HTMLInputElement
-    expect(checkbox.checked).toBe(true)
+    expect(checkbox.checked).toBe(false)
   })
 
-  it('should toggle task when checkbox is clicked', () => {
+  it('should toggle task selection when checkbox is clicked', () => {
     render(<TaskItem task={mockTask} />)
 
     fireEvent.click(screen.getByRole('checkbox'))
 
-    expect(mockToggleTask).toHaveBeenCalledWith('test-id')
+    expect(mockToggleTaskSelection).toHaveBeenCalledWith('test-id')
   })
 
   it('should show strikethrough style for completed task', () => {

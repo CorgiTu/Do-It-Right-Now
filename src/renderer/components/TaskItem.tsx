@@ -7,17 +7,25 @@ import ReminderPicker from './ReminderPicker'
 
 interface TaskItemProps {
   task: Todo
+  isSelected?: boolean
+  onToggleComplete?: () => void
 }
 
-export default function TaskItem({ task }: TaskItemProps) {
+export default function TaskItem({ task, isSelected = false, onToggleComplete }: TaskItemProps) {
   const [editing, setEditing] = useState(false)
   const [editValue, setEditValue] = useState(task.content)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const editRef = useRef<HTMLInputElement>(null)
-  const { toggleTask, updateTaskContent, deleteTask } = useTaskStore()
+  const { toggleTaskSelection, updateTaskContent, deleteTask } = useTaskStore()
 
   const handleToggle = () => {
-    toggleTask(task.id)
+    toggleTaskSelection(task.id)
+  }
+
+  const handleCompleteToggle = () => {
+    if (onToggleComplete) {
+      onToggleComplete()
+    }
   }
 
   const handleDoubleClick = () => {
@@ -73,13 +81,19 @@ export default function TaskItem({ task }: TaskItemProps) {
     <>
       <div
         data-testid="task-item"
-        className="group flex items-start gap-3 p-4 bg-white rounded-lg shadow-sm hover:shadow-md border border-[var(--color-border)] hover:border-[var(--color-accent-light)] transition-all duration-200 cursor-pointer"
+        className={`group flex items-start gap-3 p-4 rounded-lg shadow-sm hover:shadow-md border border-[var(--color-border)] hover:border-[var(--color-accent-light)] transition-all duration-200 cursor-pointer ${
+          isSelected
+            ? 'bg-[var(--color-accent-light)] bg-opacity-40'
+            : task.completed
+            ? 'bg-white'
+            : 'bg-white'
+        }`}
         onContextMenu={handleContextMenu}
       >
         <div className="mt-1 flex-shrink-0">
           <input
             type="checkbox"
-            checked={task.completed}
+            checked={isSelected}
             onChange={handleToggle}
             className="w-5 h-5 rounded border-[var(--color-accent-light)] text-[var(--color-accent)] focus:ring-[var(--color-accent-light)] focus:ring-offset-0 cursor-pointer"
           />
@@ -108,6 +122,26 @@ export default function TaskItem({ task }: TaskItemProps) {
             <DueDatePicker taskId={task.id} dueDate={task.dueDate} />
             <ReminderPicker taskId={task.id} reminder={task.reminder} dueDate={task.dueDate} />
           </div>
+        </div>
+        <div className="flex items-center gap-2 mt-1">
+          <button
+            onClick={handleCompleteToggle}
+            className="p-1.5 rounded hover:bg-[var(--color-hover)] transition-colors text-[var(--color-accent)] opacity-0 group-hover:opacity-100"
+            title={task.completed ? '标记未完成' : '标记完成'}
+          >
+            ✓
+          </button>
+          <button
+            onClick={() => {
+              setEditing(true)
+              setEditValue(task.content)
+              setTimeout(() => editRef.current?.focus(), 0)
+            }}
+            className="p-1.5 rounded hover:bg-[var(--color-hover)] transition-colors text-[var(--color-text-light)] opacity-0 group-hover:opacity-100"
+            title="编辑"
+          >
+            ✏️
+          </button>
         </div>
       </div>
       <ConfirmDialog

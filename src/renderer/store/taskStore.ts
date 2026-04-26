@@ -1,11 +1,12 @@
 import { create } from 'zustand'
 import type { Todo } from '../db/types'
-import { createTask, getAllTasks, updateTask, deleteTask } from '../db/tasks'
+import { createTask, getAllTasks, updateTask, deleteTask, deleteTasks } from '../db/tasks'
 
 interface TaskState {
   tasks: Todo[]
   loading: boolean
   error: string | null
+  selectedTaskIds: string[]
   addTask: (content: string, listId?: string) => Promise<void>
   toggleTask: (id: string) => Promise<void>
   updateTaskContent: (id: string, updates: Partial<Todo>) => Promise<void>
@@ -13,12 +14,17 @@ interface TaskState {
   loadTasks: () => Promise<void>
   reorderTasks: (tasksToUpdate: Todo[]) => Promise<void>
   moveTaskToList: (taskId: string, listId: string) => Promise<void>
+  toggleTaskSelection: (id: string) => Promise<void>
+  clearSelection: () => void
+  deleteSelectedTasks: () => Promise<void>
+  selectedCount: number
 }
 
 export const useTaskStore = create<TaskState>((set, get) => ({
   tasks: [],
   loading: false,
   error: null,
+  selectedTaskIds: [],
 
   addTask: async (content: string, listId?: string) => {
     const task = await createTask({ content, listId })
@@ -96,4 +102,36 @@ export const useTaskStore = create<TaskState>((set, get) => ({
 
     await updateTask(taskId, { listId })
   },
+
+  toggleTaskSelection: async (id: string) => {
+    set((state) => {
+      const isSelected = state.selectedTaskIds.includes(id)
+      const newSelectedTaskIds = isSelected
+        ? state.selectedTaskIds.filter(taskId => taskId !== id)
+        : [...state.selectedTaskIds, id]
+      return {
+        selectedTaskIds: newSelectedTaskIds,
+        selectedCount: newSelectedTaskIds.length,
+      }
+    })
+  },
+
+  clearSelection: () => {
+    set({ selectedTaskIds: [], selectedCount: 0 })
+  },
+
+  deleteSelectedTasks: async () => {
+    const state = get()
+    if (state.selectedTaskIds.length === 0) return
+    
+    await deleteTasks(state.selectedTaskIds)
+    
+    set((prevState) => ({
+      tasks: prevState.tasks.filter(task => !state.selectedTaskIds.includes(task.id)),
+      selectedTaskIds: [],
+      selectedCount: 0,
+    }))
+  },
+
+  selectedCount: 0,
 }))

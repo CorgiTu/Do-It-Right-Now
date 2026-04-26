@@ -138,6 +138,23 @@ export async function deleteTask(id: string): Promise<void> {
   await database.delete(STORE_NAME, id)
 }
 
+export async function deleteTasks(ids: string[]): Promise<number> {
+  if (ids.length === 0) return 0
+  
+  const database = await initDB()
+  let deletedCount = 0
+  
+  for (const id of ids) {
+    const task = await database.get(STORE_NAME, id)
+    if (task) {
+      await database.delete(STORE_NAME, id)
+      deletedCount++
+    }
+  }
+  
+  return deletedCount
+}
+
 export async function getTasksByListId(listId: string): Promise<Todo[]> {
   const database = await initDB()
   const tasks = await database.getAllFromIndex(STORE_NAME, 'byListId', listId)

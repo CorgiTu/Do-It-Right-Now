@@ -5,16 +5,21 @@ import { useThemeStore } from './store/themeStore'
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, PointerSensorArgs } from '@dnd-kit/core'
 import { useDroppable } from '@dnd-kit/core'
 import ListSidebar from './components/ListSidebar'
-import TaskInput from './components/TaskInput'
 import TaskList from './components/TaskList'
 import TaskListAllView from './components/TaskListAllView'
 import SettingsPanel from './components/SettingsPanel'
+import FloatingActionButton from './components/FloatingActionButton'
+import AddTaskModal from './components/AddTaskModal'
+import Toast from './components/Toast'
+import { useToast } from './hooks/useToast'
 
 export default function App() {
   const { loadLists, selectList, selectedListId, initDefaultList, lists } = useListStore()
-  const { loadTasks, tasks, reorderTasks, moveTaskToList } = useTaskStore()
+  const { loadTasks, tasks, reorderTasks, moveTaskToList, deleteSelectedTasks, clearSelection } = useTaskStore()
   const { currentThemeId } = useThemeStore()
   const [showSettings, setShowSettings] = useState(false)
+  const [showAddTaskModal, setShowAddTaskModal] = useState(false)
+  const { toasts, showToast, removeToast } = useToast()
 
   useEffect(() => {
     const init = async () => {
@@ -117,7 +122,6 @@ export default function App() {
           </header>
           <main className="flex-1 overflow-y-auto px-8 py-6">
             <div className="max-w-3xl mx-auto w-full">
-              <TaskInput listId={selectedListId === 'all' ? undefined : selectedListId} />
               <div className="mt-6 animate-slide-up">
                 {selectedListId === 'all' ? (
                   <TaskListAllView />
@@ -144,6 +148,20 @@ export default function App() {
             </div>
           </div>
         )}
+        <FloatingActionButton
+          onAddTask={() => setShowAddTaskModal(true)}
+          onDeleteSelected={async (count) => {
+            await deleteSelectedTasks()
+            clearSelection()
+            showToast(`已删除 ${count} 个任务`)
+          }}
+        />
+        <AddTaskModal
+          isOpen={showAddTaskModal}
+          onClose={() => setShowAddTaskModal(false)}
+          listId={selectedListId === 'all' ? undefined : selectedListId}
+        />
+        <Toast toasts={toasts} onClose={removeToast} />
       </div>
     </DndContext>
   )
