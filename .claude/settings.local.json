@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(java -version)",
+      "Bash(gradle --version)",
+      "Bash(cmd /c \"java -version 2>&1\")",
+      "Bash(cmd /c \"where gradle 2>&1\")",
+      "Bash(cmd /c \"java -version\")",
+      "Bash(powershell -Command \"java -version 2>&1\")",
+      "Bash(powershell -Command \"ls 'C:\\\\Program Files\\\\Android\\\\Android Studio\\\\jbr' -ErrorAction SilentlyContinue | Select-Object -First 3\")",
+      "Bash(powershell -Command ':*)",
+      "Bash(export JAVA_HOME=\"D:/AndroidStudio/jbr\")",
+      "Bash(export PATH=\"$JAVA_HOME/bin:$PATH\")",
+      "Bash(./gradlew :app:testDebugUnitTest --tests \"com.sleeptracker.feature.sync.MiFitDbReaderTest\")",
+      "Bash(./gradlew :app:testDebugUnitTest)",
+      "Bash(./gradlew :app:testDebugUnitTest --tests \"com.sleeptracker.feature.sync.SyncRepositoryTest\")",
+      "Bash(./gradlew :app:testDebugUnitTest --tests \"com.sleeptracker.feature.sync.CsvImporterTest\")",
+      "Bash(./gradlew :app:testDebugUnitTest --tests \"com.sleeptracker.feature.sync.JsonImporterTest\")",
+      "Bash(./gradlew :app:testDebugUnitTest --tests \"com.sleeptracker.feature.sync.SyncViewModelTest\")",
+      "Bash(./gradlew :app:testDebugUnitTest --tests \"com.sleeptracker.feature.sync.SyncViewModelTest\" --info)",
+      "Bash(./gradlew :app:testDebugUnitTest --tests \"com.sleeptracker.feature.sync.SyncRepositoryFileImportTest\")",
+      "Bash(./gradlew :app:testDebugUnitTest --tests \"com.sleeptracker.feature.sync.SyncRepositoryFileImportTest\" --tests \"com.sleeptracker.feature.sync.SyncRepositoryTest\")"
+    ]
+  }
+}
