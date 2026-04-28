@@ -1,7 +1,6 @@
 import { create } from 'zustand'
 import type { TodoList } from '../db/types'
 import { createList, getAllLists, updateList, deleteList, listExists, createDefaultList } from '../db/lists'
-import { initDB, LISTS_STORE_NAME } from '../db/tasks'
 
 interface ListState {
   lists: TodoList[]
@@ -22,6 +21,7 @@ export const useListStore = create<ListState>((set, get) => ({
   error: null,
 
   addList: async (name: string, color: string, icon: string) => {
+    console.log('[ListStore] Adding list:', name)
     const trimmedName = name.trim()
     if (!trimmedName) {
       return { success: false, error: '分组名称不能为空' }
@@ -33,18 +33,20 @@ export const useListStore = create<ListState>((set, get) => ({
 
     try {
       const list = await createList({ name: trimmedName, color, icon })
+      console.log('[ListStore] List added successfully:', list)
       set((state) => ({
         lists: [...state.lists, list],
       }))
       return { success: true }
-    } catch {
+    } catch (error) {
+      console.error('[ListStore] Failed to add list:', error)
       return { success: false, error: '创建分组失败' }
     }
   },
 
   removeList: async (id: string) => {
-    const database = await initDB()
-    const tasksInList = await database.getAllFromIndex('todos', 'byListId', id)
+    const { getTasksByListId } = await import('../db/tasks')
+    const tasksInList = await getTasksByListId(id)
 
     if (tasksInList.length === 0) {
       await deleteList(id)

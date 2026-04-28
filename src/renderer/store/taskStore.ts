@@ -27,10 +27,17 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   selectedTaskIds: [],
 
   addTask: async (content: string, listId?: string) => {
-    const task = await createTask({ content, listId })
-    set((state) => ({
-      tasks: [...state.tasks, task],
-    }))
+    console.log('[TaskStore] Adding task:', content, 'to list:', listId)
+    try {
+      const task = await createTask({ content, listId })
+      console.log('[TaskStore] Task added successfully:', task)
+      set((state) => ({
+        tasks: [...state.tasks, task],
+      }))
+    } catch (error) {
+      console.error('[TaskStore] Failed to add task:', error)
+      throw error
+    }
   },
 
   toggleTask: async (id: string) => {

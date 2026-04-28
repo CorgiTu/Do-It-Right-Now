@@ -16,6 +16,23 @@ export default defineConfig({
           },
         },
       },
+      {
+        entry: 'src/main/preload.ts',
+        onstart(options) {
+          // 通知 Electron 重新加载 preload 页面
+          options.reload()
+        },
+        vite: {
+          build: {
+            outDir: 'dist/main',
+            rollupOptions: {
+              output: {
+                format: 'cjs',
+              },
+            },
+          },
+        },
+      },
     ]),
     renderer(),
   ],
