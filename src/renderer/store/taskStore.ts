@@ -1,13 +1,14 @@
 import { create } from 'zustand'
 import type { Todo } from '../db/types'
-import { createTask, getAllTasks, updateTask, deleteTask, deleteTasks } from '../db/tasks'
+import { createTask, getAllTasks, updateTask, deleteTask, deleteTasks, markTaskCompletedWithRecurrence, resetRecurringTasksForDailyList, migrateExistingDailyTasks } from '../db/tasks'
+import { getDailyList } from '../db/lists'
 
 interface TaskState {
   tasks: Todo[]
   loading: boolean
   error: string | null
   selectedTaskIds: string[]
-  addTask: (content: string, listId?: string) => Promise<void>
+  addTask: (content: string, listId?: string, isRecurring?: boolean) => Promise<void>
   toggleTask: (id: string) => Promise<void>
   updateTaskContent: (id: string, updates: Partial<Todo>) => Promise<void>
   deleteTask: (id: string) => Promise<void>
@@ -18,6 +19,7 @@ interface TaskState {
   clearSelection: () => void
   deleteSelectedTasks: () => Promise<void>
   selectedCount: number
+  initializeDailyTasks: () => Promise<void>
 }
 
 export const useTaskStore = create<TaskState>((set, get) => ({
@@ -26,10 +28,15 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   error: null,
   selectedTaskIds: [],
 
-  addTask: async (content: string, listId?: string) => {
-    console.log('[TaskStore] Adding task:', content, 'to list:', listId)
+  addTask: async (content: string, listId?: string, isRecurring?: boolean) => {
+    console.log('[TaskStore] Adding task:', content, 'to list:', listId, 'isRecurring:', isRecurring)
     try {
-      const task = await createTask({ content, listId })
+      const task = await createTask({ 
+        content, 
+        listId,
+        isRecurring: isRecurring ?? false,
+        recurrencePattern: isRecurring ? 'daily' : null,
+      })
       console.log('[TaskStore] Task added successfully:', task)
       set((state) => ({
         tasks: [...state.tasks, task],
@@ -41,18 +48,25 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   },
 
   toggleTask: async (id: string) => {
+    const task = useTaskStore.getState().tasks.find(t => t.id === id)
+    if (!task) return
+    
+    const newCompleted = !task.completed
+    
     set((state) => ({
       tasks: state.tasks.map((task) =>
         task.id === id
-          ? { ...task, completed: !task.completed, updatedAt: new Date().toISOString() }
+          ? { 
+              ...task, 
+              completed: newCompleted, 
+              lastCompletedDate: newCompleted ? new Date().toISOString().split('T')[0] : null,
+              updatedAt: new Date().toISOString() 
+            }
           : task
       ),
     }))
 
-    const task = useTaskStore.getState().tasks.find(t => t.id === id)
-    if (task) {
-      await updateTask(id, { completed: task.completed })
-    }
+    await markTaskCompletedWithRecurrence(id, newCompleted)
   },
 
   updateTaskContent: async (id: string, updates: Partial<Todo>) => {
@@ -85,14 +99,33 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   },
 
   reorderTasks: async (tasksToUpdate: Todo[]) => {
+    console.log('[TaskStore.reorderTasks] Updating tasks:', tasksToUpdate)
+    
+    // First, update the state immediately
     set((state) => {
+      // Create a map of task updates
+      const updateMap = new Map(tasksToUpdate.map(t => [t.id, t.order]))
+      
       const updatedTasks = state.tasks.map(task => {
-        const updated = tasksToUpdate.find(t => t.id === task.id)
-        return updated ? { ...updated } : task
+        const newOrder = updateMap.get(task.id)
+        if (newOrder !== undefined) {
+          return { ...task, order: newOrder, updatedAt: new Date().toISOString() }
+        }
+        return task
       })
-      return { tasks: updatedTasks }
+      
+      // Re-sort tasks by order
+      const sortedTasks = [...updatedTasks].sort((a, b) => {
+        if (a.completed !== b.completed) {
+          return a.completed ? 1 : -1
+        }
+        return a.order - b.order
+      })
+      
+      return { tasks: sortedTasks }
     })
 
+    // Then, persist to database
     for (const task of tasksToUpdate) {
       await updateTask(task.id, { order: task.order })
     }
@@ -141,4 +174,34 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   },
 
   selectedCount: 0,
+
+  initializeDailyTasks: async () => {
+    console.log('[TaskStore.initializeDailyTasks] Starting initialization...')
+    try {
+      const dailyListId = localStorage.getItem('todo-app-daily-list-id')
+      console.log('[TaskStore.initializeDailyTasks] Saved daily list ID:', dailyListId)
+      
+      let dailyListIdToUse = dailyListId
+      
+      if (!dailyListIdToUse) {
+        const fallbackDailyList = await getDailyList()
+        if (fallbackDailyList) {
+          dailyListIdToUse = fallbackDailyList.id
+          console.log('[TaskStore.initializeDailyTasks] Using fallback Daily list:', dailyListIdToUse)
+        }
+      }
+      
+      if (dailyListIdToUse) {
+        console.log('[TaskStore.initializeDailyTasks] Migrating existing daily tasks...')
+        await migrateExistingDailyTasks(dailyListIdToUse)
+        console.log('[TaskStore.initializeDailyTasks] Resetting recurring tasks...')
+        resetRecurringTasksForDailyList(dailyListIdToUse)
+        console.log('[TaskStore.initializeDailyTasks] Daily tasks initialized for list:', dailyListIdToUse)
+      } else {
+        console.log('[TaskStore.initializeDailyTasks] No daily list configured')
+      }
+    } catch (error) {
+      console.error('[TaskStore] Failed to initialize daily tasks:', error)
+    }
+  },
 }))

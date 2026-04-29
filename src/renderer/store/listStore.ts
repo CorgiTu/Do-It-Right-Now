@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import type { TodoList } from '../db/types'
-import { createList, getAllLists, updateList, deleteList, listExists, createDefaultList } from '../db/lists'
+import { createList, getAllLists, updateList as dbUpdateList, deleteList, listExists, createDefaultList, createDailyList } from '../db/lists'
 
 interface ListState {
   lists: TodoList[]
@@ -8,10 +8,13 @@ interface ListState {
   loading: boolean
   error: string | null
   addList: (name: string, color: string, icon: string) => Promise<{ success: boolean; error?: string }>
+  updateList: (id: string, updates: Partial<TodoList>) => Promise<void>
   removeList: (id: string) => Promise<boolean>
   selectList: (id: string | 'all') => void
   loadLists: () => Promise<void>
   initDefaultList: () => Promise<void>
+  initDailyList: () => Promise<void>
+  reorderLists: (lists: TodoList[]) => Promise<void>
 }
 
 export const useListStore = create<ListState>((set, get) => ({
@@ -42,6 +45,25 @@ export const useListStore = create<ListState>((set, get) => ({
       console.error('[ListStore] Failed to add list:', error)
       return { success: false, error: '创建分组失败' }
     }
+  },
+
+  updateList: async (id: string, updates: Partial<TodoList>) => {
+    try {
+      const updatedList = await dbUpdateList(id, updates)
+      set((state) => ({
+        lists: state.lists.map((l) => (l.id === id ? updatedList : l)),
+      }))
+    } catch (error) {
+      console.error('[ListStore] Failed to update list:', error)
+    }
+  },
+
+  reorderLists: async (lists: TodoList[]) => {
+    const { updateList } = await import('../db/lists')
+    for (const list of lists) {
+      await updateList(list.id, { order: list.order })
+    }
+    set({ lists: [...lists] })
   },
 
   removeList: async (id: string) => {
@@ -79,6 +101,20 @@ export const useListStore = create<ListState>((set, get) => ({
     set((state) => {
       const exists = state.lists.some(l => l.id === list.id)
       if (exists) return state
+      return { lists: [...state.lists, list] }
+    })
+  },
+
+  initDailyList: async () => {
+    const list = await createDailyList()
+    set((state) => {
+      const exists = state.lists.some(l => l.id === list.id)
+      if (exists) {
+        const listIndex = state.lists.findIndex(l => l.id === list.id)
+        const updatedLists = [...state.lists]
+        updatedLists[listIndex] = list
+        return { lists: updatedLists }
+      }
       return { lists: [...state.lists, list] }
     })
   },

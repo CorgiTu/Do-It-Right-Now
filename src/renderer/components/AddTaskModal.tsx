@@ -9,8 +9,22 @@ interface AddTaskModalProps {
 
 export default function AddTaskModal({ isOpen, onClose, listId }: AddTaskModalProps) {
   const [content, setContent] = useState('')
+  const [isDailyList, setIsDailyList] = useState(false)
   const { addTask } = useTaskStore()
   const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    const checkDailyList = async () => {
+      if (listId) {
+        const savedDailyListId = localStorage.getItem('todo-app-daily-list-id')
+        const isDaily = savedDailyListId === listId
+        setIsDailyList(isDaily)
+      } else {
+        setIsDailyList(false)
+      }
+    }
+    checkDailyList()
+  }, [listId, isOpen])
 
   useEffect(() => {
     if (isOpen && inputRef.current) {
@@ -21,7 +35,7 @@ export default function AddTaskModal({ isOpen, onClose, listId }: AddTaskModalPr
   const handleAdd = async () => {
     const trimmed = content.trim()
     if (trimmed) {
-      await addTask(trimmed, listId)
+      await addTask(trimmed, listId, isDailyList)
       setContent('')
       onClose()
     }
@@ -53,7 +67,9 @@ export default function AddTaskModal({ isOpen, onClose, listId }: AddTaskModalPr
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between p-6 border-b border-[var(--color-border)]">
-          <h2 className="text-xl font-semibold text-[var(--color-text)]">添加任务</h2>
+          <h2 className="text-xl font-semibold text-[var(--color-text)]">
+            {isDailyList ? '添加每日任务' : '添加任务'}
+          </h2>
           <button
             onClick={onClose}
             className="p-1 rounded-lg hover:bg-[var(--color-hover)] transition-colors text-[var(--color-text-light)]"
@@ -62,13 +78,18 @@ export default function AddTaskModal({ isOpen, onClose, listId }: AddTaskModalPr
           </button>
         </div>
         <div className="p-6">
+          {isDailyList && (
+            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">
+              💡 此分组中的任务将自动设置为每日重复，每天自动重置完成状态。
+            </div>
+          )}
           <input
             ref={inputRef}
             type="text"
             value={content}
             onChange={(e) => setContent(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="输入任务内容..."
+            placeholder={isDailyList ? '输入每日任务内容...' : '输入任务内容...'}
             className="w-full px-4 py-3 bg-[var(--color-bg)] border border-[var(--color-accent-light)] rounded-lg text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-light)]"
           />
           <div className="mt-4 flex justify-end gap-3">

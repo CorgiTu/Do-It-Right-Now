@@ -9,9 +9,13 @@ interface TaskItemProps {
   task: Todo
   isSelected?: boolean
   onToggleComplete?: () => void
+  dragHandleProps?: {
+    listeners: any
+    attributes: Record<string, any>
+  }
 }
 
-export default function TaskItem({ task, isSelected = false, onToggleComplete }: TaskItemProps) {
+export default function TaskItem({ task, isSelected = false, onToggleComplete, dragHandleProps }: TaskItemProps) {
   const [editing, setEditing] = useState(false)
   const [editValue, setEditValue] = useState(task.content)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
@@ -39,9 +43,8 @@ export default function TaskItem({ task, isSelected = false, onToggleComplete }:
       const trimmed = editValue.trim()
       if (trimmed) {
         updateTaskContent(task.id, { content: trimmed })
-        setEditing(false)
       }
-      // 空内容时保持编辑状态，不退出
+      setEditing(false)
     } else if (e.key === 'Escape') {
       setEditValue(task.content)
       setEditing(false)
@@ -49,7 +52,6 @@ export default function TaskItem({ task, isSelected = false, onToggleComplete }:
   }
 
   const handleEditBlur = () => {
-    // 同 ESC 行为：恢复原内容，退出编辑模式
     setEditValue(task.content)
     setEditing(false)
   }
@@ -81,16 +83,33 @@ export default function TaskItem({ task, isSelected = false, onToggleComplete }:
     <>
       <div
         data-testid="task-item"
-        className={`group flex items-start gap-3 p-4 rounded-lg shadow-sm hover:shadow-md border border-[var(--color-border)] hover:border-[var(--color-accent-light)] transition-all duration-200 cursor-pointer ${
+        className={`sortable-item group flex items-start gap-3 p-4 rounded-lg shadow-sm border transition-all duration-200 ${
           isSelected
-            ? 'bg-[var(--color-accent-light)] bg-opacity-40'
+            ? 'bg-[var(--color-accent-light)] bg-opacity-40 border-[var(--color-accent)]'
             : task.completed
-            ? 'bg-white'
-            : 'bg-white'
-        }`}
+            ? 'bg-white border-[var(--color-border)]'
+            : 'bg-white border-[var(--color-border)]'
+        } ${dragHandleProps ? 'hover:shadow-lg hover:-translate-y-0.5' : ''}`}
         onContextMenu={handleContextMenu}
       >
-        <div className="mt-1 flex-shrink-0">
+        {dragHandleProps && (
+          <div
+            {...dragHandleProps.listeners}
+            {...dragHandleProps.attributes}
+            className="drag-handle mt-1 flex-shrink-0 p-1.5 rounded hover:bg-gray-100"
+            title="拖动排序"
+          >
+            <svg className="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="currentColor">
+              <circle cx="9" cy="6" r="1.5" />
+              <circle cx="15" cy="6" r="1.5" />
+              <circle cx="9" cy="12" r="1.5" />
+              <circle cx="15" cy="12" r="1.5" />
+              <circle cx="9" cy="18" r="1.5" />
+              <circle cx="15" cy="18" r="1.5" />
+            </svg>
+          </div>
+        )}
+        <div className="flex-shrink-0">
           <input
             type="checkbox"
             checked={isSelected}
@@ -107,15 +126,23 @@ export default function TaskItem({ task, isSelected = false, onToggleComplete }:
               onChange={(e) => setEditValue(e.target.value)}
               onKeyDown={handleEditKeyDown}
               onBlur={handleEditBlur}
-              className="w-full px-3 py-2 bg-[var(--color-bg)] border border-[var(--color-accent-light)] rounded text-[var(--color-text)] focus:outline-none"
+              className="w-full px-3 py-2 border border-[var(--color-accent-light)] rounded bg-[var(--color-bg)] text-[var(--color-text)] focus:outline-none text-base"
             />
           ) : (
-            <span
-              onDoubleClick={handleDoubleClick}
-              className={`block transition-colors duration-200 ${task.completed ? 'line-through text-[var(--color-text-light)]' : 'text-[var(--color-text)]'}`}
-            >
-              {task.content}
-            </span>
+            <div className="flex items-center gap-2">
+              <span
+                onDoubleClick={handleDoubleClick}
+                className={`block ${task.completed ? 'line-through text-[var(--color-text-light)]' : 'text-[var(--color-text)]'}`}
+              >
+                {task.content}
+              </span>
+              {task.isRecurring && (
+                <span className="text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full border border-green-200" title="每日重复">
+                  🔄 每日
+                </span>
+              )}
+              {console.log('[TaskItem] Task:', task.content, 'isRecurring:', task.isRecurring)}
+            </div>
           )}
           <div className="flex items-center gap-3 mt-2">
             <span className="text-xs text-[var(--color-text-light)] opacity-70">{formatDate(task.createdAt)}</span>

@@ -2,9 +2,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import ListSidebar from './ListSidebar'
 import { useListStore } from '../store/listStore'
+import { useTaskStore } from '../store/taskStore'
 
 vi.mock('../store/listStore', () => ({
   useListStore: vi.fn(),
+}))
+
+vi.mock('../store/taskStore', () => ({
+  useTaskStore: vi.fn(),
 }))
 
 vi.mock('./ListManager', () => ({
@@ -29,6 +34,9 @@ describe('ListSidebar', () => {
       selectedListId: 'all',
       selectList: mockSelectList,
     })
+    ;(useTaskStore as any).mockReturnValue({
+      tasks: [],
+    })
 
     render(<ListSidebar onListSelect={vi.fn()} />)
 
@@ -40,6 +48,9 @@ describe('ListSidebar', () => {
       lists: mockLists,
       selectedListId: 'all',
       selectList: mockSelectList,
+    })
+    ;(useTaskStore as any).mockReturnValue({
+      tasks: [],
     })
 
     render(<ListSidebar onListSelect={vi.fn()} />)
@@ -53,6 +64,9 @@ describe('ListSidebar', () => {
       lists: mockLists,
       selectedListId: 'list-1',
       selectList: mockSelectList,
+    })
+    ;(useTaskStore as any).mockReturnValue({
+      tasks: [],
     })
 
     render(<ListSidebar onListSelect={vi.fn()} />)
@@ -74,6 +88,9 @@ describe('ListSidebar', () => {
       selectedListId: 'all',
       selectList: mockSelectList,
     })
+    ;(useTaskStore as any).mockReturnValue({
+      tasks: [],
+    })
 
     render(<ListSidebar onListSelect={mockOnListSelect} />)
 
@@ -89,6 +106,9 @@ describe('ListSidebar', () => {
       selectedListId: 'all',
       selectList: mockSelectList,
     })
+    ;(useTaskStore as any).mockReturnValue({
+      tasks: [],
+    })
 
     render(<ListSidebar onListSelect={vi.fn()} />)
 
@@ -100,6 +120,9 @@ describe('ListSidebar', () => {
       lists: mockLists,
       selectedListId: 'all',
       selectList: mockSelectList,
+    })
+    ;(useTaskStore as any).mockReturnValue({
+      tasks: [],
     })
 
     render(<ListSidebar onListSelect={vi.fn()} />)

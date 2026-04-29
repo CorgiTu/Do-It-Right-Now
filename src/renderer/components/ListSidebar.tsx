@@ -1,83 +1,62 @@
+import { useState } from 'react'
 import { useListStore } from '../store/listStore'
+import { useTaskStore } from '../store/taskStore'
 import { useDroppable } from '@dnd-kit/core'
+import SortableListItem from './SortableListItem'
 import ListManager from './ListManager'
-import type { TodoList } from '../db/types'
 
 interface ListSidebarProps {
   onListSelect: (id: string | 'all') => void
-  droppableLists: TodoList[]
 }
 
-function DroppableListItem({ list, isSelected, onSelect }: { list: TodoList; isSelected: boolean; onSelect: (id: string) => void }) {
-  const { setNodeRef, isOver } = useDroppable({ id: `list-${list.id}` })
+export default function ListSidebar({ onListSelect }: ListSidebarProps) {
+  const { selectedListId, lists } = useListStore()
+  const { tasks } = useTaskStore()
+  const [showManager, setShowManager] = useState(false)
 
-  return (
-    <div
-      ref={setNodeRef}
-      className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer mb-1 transition-all duration-200 ${
-        isSelected
-          ? 'bg-[var(--color-accent-light)] bg-opacity-30 text-[var(--color-text)] font-medium'
-          : isOver
-            ? 'bg-[var(--color-hover)] ring-1 ring-[var(--color-accent-light)]'
-            : 'hover:bg-[var(--color-hover)] text-[var(--color-text-light)]'
-      }`}
-      onClick={() => onSelect(list.id)}
-    >
-      <span
-        className="w-3 h-3 rounded-full shadow-sm"
-        style={{ backgroundColor: list.color }}
-      />
-      <span className="text-sm flex-1">{list.name}</span>
-    </div>
-  )
-}
+  const { setNodeRef } = useDroppable({
+    id: 'all-tasks',
+  })
 
-export default function ListSidebar({ onListSelect, droppableLists }: ListSidebarProps) {
-  const { lists, selectedListId, selectList } = useListStore()
-  const { setNodeRef: setAllRef, isOver: isAllOver } = useDroppable({ id: 'list-all' })
-
-  const handleSelect = (id: string | 'all') => {
-    selectList(id)
-    onListSelect(id)
+  const getTaskCount = (listId: string) => {
+    return tasks.filter(t => t.listId === listId && !t.completed).length
   }
 
   return (
-    <aside className="w-64 bg-[var(--color-bg)] border-r border-[var(--color-border)] p-5 flex flex-col h-full shadow-sm">
-      <div className="mb-6">
-        <h2 className="text-lg font-semibold text-[var(--color-text)] mb-1 tracking-wide">待办清单</h2>
+    <aside className="w-72 bg-[var(--color-bg-secondary)] border-r border-[var(--color-border)] flex flex-col shadow-sm">
+      <div className="p-4 border-b border-[var(--color-border)]">
+        <h2 className="text-lg font-semibold text-[var(--color-text)] tracking-wide">待办清单</h2>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
-        <div
-          ref={setAllRef}
-          className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer mb-1 transition-all duration-200 ${
-            selectedListId === 'all'
-              ? 'bg-[var(--color-accent-light)] bg-opacity-30 text-[var(--color-text)] font-medium'
-              : isAllOver
-                ? 'bg-[var(--color-hover)] ring-1 ring-[var(--color-accent-light)]'
-                : 'hover:bg-[var(--color-hover)] text-[var(--color-text-light)]'
-          }`}
-          onClick={() => handleSelect('all')}
-        >
-          <span className="text-base">📋</span>
-          <span className="text-sm">全部任务</span>
+      <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+        <div ref={setNodeRef}>
+          <button
+            onClick={() => onListSelect('all')}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left group ${
+              selectedListId === 'all'
+                ? 'bg-[var(--color-accent-light)] bg-opacity-60 text-[var(--color-text)]'
+                : 'hover:bg-[var(--color-hover)] text-[var(--color-text-light)] hover:text-[var(--color-text)]'
+            }`}
+          >
+            <span className="text-lg"></span>
+            <span className="text-sm truncate">全部任务</span>
+            <span className="text-xs opacity-70 ml-auto">{tasks.filter(t => !t.completed).length}</span>
+          </button>
         </div>
 
-        <div className="mt-3">
-          {lists.map((list) => (
-            <DroppableListItem
-              key={list.id}
+        {lists.map(list => (
+          <div key={list.id} className="relative group">
+            <SortableListItem
               list={list}
               isSelected={selectedListId === list.id}
-              onSelect={handleSelect}
+              onSelect={() => onListSelect(list.id)}
+              taskCount={getTaskCount(list.id)}
             />
-          ))}
-        </div>
-      </div>
+          </div>
+        ))}
+      </nav>
 
-      <div className="pt-4 border-t border-[var(--color-border)] mt-4">
-        <ListManager />
-      </div>
+      <ListManager isOpen={showManager} onClose={() => setShowManager(false)} onOpen={() => setShowManager(true)} />
     </aside>
   )
 }

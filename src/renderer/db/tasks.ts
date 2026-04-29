@@ -17,6 +17,8 @@ function getTasks(): Todo[] {
 function saveTasks(tasks: Todo[]): void {
   try {
     localStorage.setItem(TASKS_KEY, JSON.stringify(tasks))
+    console.log('[Storage] Tasks saved, count:', tasks.length)
+    console.log('[Storage] Raw data:', localStorage.getItem(TASKS_KEY)?.slice(0, 200))
   } catch (error) {
     console.error('[Storage] Failed to save tasks:', error)
     throw error
@@ -64,6 +66,10 @@ export async function createTask(input: CreateTodoInput): Promise<Todo> {
     order: maxOrder + 1,
     createdAt: now,
     updatedAt: now,
+    isRecurring: input.isRecurring ?? false,
+    recurrencePattern: input.recurrencePattern ?? null,
+    lastCompletedDate: input.lastCompletedDate ?? null,
+    originalTaskId: input.originalTaskId ?? null,
   }
 
   console.log('[tasks.createTask] Attempting to save task:', task)
@@ -86,11 +92,8 @@ export async function getAllTasks(): Promise<Todo[]> {
     if (a.completed !== b.completed) {
       return a.completed ? 1 : -1
     }
-    const priorityA = a.priority || 'medium'
-    const priorityB = b.priority || 'medium'
-    const priorityDiff = priorityOrder[priorityA] - priorityOrder[priorityB]
-    if (priorityDiff !== 0) return priorityDiff
-    return b.createdAt.localeCompare(a.createdAt)
+    // Use order field for sorting within the same completion status
+    return a.order - b.order
   })
 }
 
@@ -133,11 +136,8 @@ export async function getTasksByListId(listId: string): Promise<Todo[]> {
     if (a.completed !== b.completed) {
       return a.completed ? 1 : -1
     }
-    const priorityA = a.priority || 'medium'
-    const priorityB = b.priority || 'medium'
-    const priorityDiff = priorityOrder[priorityA] - priorityOrder[priorityB]
-    if (priorityDiff !== 0) return priorityDiff
-    return b.createdAt.localeCompare(a.createdAt)
+    // Use order field for sorting within the same completion status
+    return a.order - b.order
   })
 }
 
@@ -147,3 +147,83 @@ export async function deleteTasksByListId(listId: string): Promise<void> {
 }
 
 export const LISTS_STORE_NAME = 'lists'
+
+export function isToday(dateString: string | null): boolean {
+  if (!dateString) return false
+  const date = new Date(dateString)
+  const today = new Date()
+  return date.getFullYear() === today.getFullYear() &&
+         date.getMonth() === today.getMonth() &&
+         date.getDate() === today.getDate()
+}
+
+export function resetRecurringTasksForDailyList(listId: string): void {
+  const tasks = getTasks()
+  const today = new Date().toISOString().split('T')[0]
+  
+  let hasChanges = false
+  const updatedTasks = tasks.map(task => {
+    if (task.listId === listId && task.isRecurring && task.completed) {
+      if (task.lastCompletedDate && task.lastCompletedDate < today) {
+        hasChanges = true
+        return {
+          ...task,
+          completed: false,
+          lastCompletedDate: null,
+          updatedAt: new Date().toISOString()
+        }
+      }
+    }
+    return task
+  })
+  
+  if (hasChanges) {
+    saveTasks(updatedTasks)
+    console.log('[tasks.resetRecurringTasksForDailyList] Reset recurring tasks for list:', listId)
+  }
+}
+
+export function markTaskCompletedWithRecurrence(id: string, completed: boolean): Promise<Todo> {
+  const tasks = getTasks()
+  const taskIndex = tasks.findIndex(t => t.id === id)
+
+  if (taskIndex === -1) {
+    throw new Error(`Task with id ${id} not found`)
+  }
+
+  const task = tasks[taskIndex]
+  const now = new Date().toISOString()
+  
+  const updated: Todo = {
+    ...task,
+    completed,
+    lastCompletedDate: completed ? now.split('T')[0] : null,
+    updatedAt: now,
+  }
+
+  tasks[taskIndex] = updated
+  saveTasks(tasks)
+  return updated
+}
+
+export async function migrateExistingDailyTasks(listId: string): Promise<void> {
+  const tasks = getTasks()
+  let hasChanges = false
+  
+  const updatedTasks = tasks.map(task => {
+    if (task.listId === listId && !task.isRecurring) {
+      hasChanges = true
+      return {
+        ...task,
+        isRecurring: true,
+        recurrencePattern: 'daily' as const,
+      }
+    }
+    return task
+  })
+  
+  if (hasChanges) {
+    saveTasks(updatedTasks)
+    console.log('[tasks.migrateExistingDailyTasks] Migrated tasks in list', listId, 'to recurring')
+  }
+}

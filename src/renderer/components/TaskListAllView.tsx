@@ -1,11 +1,67 @@
 import { useEffect } from 'react'
 import { useTaskStore } from '../store/taskStore'
 import { useListStore } from '../store/listStore'
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import TaskItem from './TaskItem'
 import type { Todo } from '../db/types'
 
+/**
+ * SortableTaskItemAllView - 全部任务视图中的任务项拖拽组件
+ * 
+ * 动画优化与 TaskList.tsx 中的 SortableTaskItem 保持一致
+ */
+function SortableTaskItemAllView({ task }: { task: Todo }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ 
+    id: task.id,
+    transition: {
+      duration: 180,
+      easing: 'ease-out',
+    },
+    resizeObserverConfig: {
+      disabled: true,
+    },
+  })
+
+  const { toggleTask, selectedTaskIds = [] } = useTaskStore()
+  const isSelected = selectedTaskIds.includes(task.id)
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition: transition || 'transform 180ms ease-out',
+  }
+
+  return (
+    <div 
+      ref={setNodeRef} 
+      style={style}
+      className="sortable-item"
+    >
+      {/* 占位条：拖拽时保持尺寸 */}
+      <div style={isDragging ? { 
+        visibility: 'hidden',
+        pointerEvents: 'none',
+      } : {}}>
+        <TaskItem
+          task={task}
+          isSelected={isSelected}
+          onToggleComplete={() => toggleTask(task.id)}
+          dragHandleProps={isDragging ? undefined : { listeners, attributes }}
+        />
+      </div>
+    </div>
+  )
+}
+
 export default function TaskListAllView() {
-  const { tasks, loadTasks, toggleTask, selectedTaskIds = [] } = useTaskStore()
+  const { tasks, loadTasks } = useTaskStore()
   const { lists } = useListStore()
 
   useEffect(() => {
@@ -48,18 +104,11 @@ export default function TaskListAllView() {
             <div className="flex flex-col gap-4 ml-5">
               {incompleteTasks.length > 0 && (
                 <ul role="list" className="space-y-3">
-                  {incompleteTasks.map(task => {
-                    const isSelected = selectedTaskIds.includes(task.id)
-                    return (
-                      <li key={task.id}>
-                        <TaskItem 
-                          task={task} 
-                          isSelected={isSelected}
-                          onToggleComplete={() => toggleTask(task.id)}
-                        />
-                      </li>
-                    )
-                  })}
+                  {incompleteTasks.map(task => (
+                    <li key={task.id}>
+                      <SortableTaskItemAllView task={task} />
+                    </li>
+                  ))}
                 </ul>
               )}
 
@@ -67,18 +116,11 @@ export default function TaskListAllView() {
                 <div className="pt-6 border-t border-[var(--color-border)]">
                   <h3 className="text-sm text-[var(--color-text-light)] mb-3 font-medium tracking-wide">已完成 ({completedTasks.length})</h3>
                   <ul role="list" className="space-y-2">
-                    {completedTasks.map(task => {
-                      const isSelected = selectedTaskIds.includes(task.id)
-                      return (
-                        <li key={task.id}>
-                          <TaskItem 
-                            task={task} 
-                            isSelected={isSelected}
-                            onToggleComplete={() => toggleTask(task.id)}
-                          />
-                        </li>
-                      )
-                    })}
+                  {completedTasks.map(task => (
+                    <li key={task.id}>
+                      <SortableTaskItemAllView task={task} />
+                    </li>
+                  ))}
                   </ul>
                 </div>
               )}

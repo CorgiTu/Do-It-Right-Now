@@ -6,7 +6,10 @@ const LISTS_KEY = 'todo-app-data'
 function getLists(): TodoList[] {
   try {
     const data = localStorage.getItem(LISTS_KEY)
-    return data ? JSON.parse(data) : []
+    console.log('[Storage] getLists - raw data length:', data?.length || 0)
+    const lists = data ? JSON.parse(data) : []
+    console.log('[Storage] getLists - parsed lists count:', lists.length)
+    return lists
   } catch (error) {
     console.error('[Storage] Failed to read lists:', error)
     return []
@@ -16,6 +19,8 @@ function getLists(): TodoList[] {
 function saveLists(lists: TodoList[]): void {
   try {
     localStorage.setItem(LISTS_KEY, JSON.stringify(lists))
+    console.log('[Storage] Lists saved, count:', lists.length)
+    console.log('[Storage] Raw data:', localStorage.getItem(LISTS_KEY)?.slice(0, 200))
   } catch (error) {
     console.error('[Storage] Failed to save lists:', error)
     throw error
@@ -91,4 +96,29 @@ export async function createDefaultList(): Promise<TodoList> {
     color: '#3B82F6',
     icon: 'inbox',
   })
+}
+
+export async function createDailyList(): Promise<TodoList> {
+  const exists = await listExists('Daily')
+  if (exists) {
+    const lists = getLists()
+    const dailyList = lists.find(l => l.name === 'Daily')
+    if (dailyList && !dailyList.isDailyList) {
+      await updateList(dailyList.id, { isDailyList: true })
+      return { ...dailyList, isDailyList: true }
+    }
+    return dailyList!
+  }
+
+  return createList({
+    name: 'Daily',
+    color: '#10B981',
+    icon: 'repeat',
+    isDailyList: true,
+  })
+}
+
+export async function getDailyList(): Promise<TodoList | undefined> {
+  const lists = getLists()
+  return lists.find(l => l.name === 'Daily' && l.isDailyList)
 }

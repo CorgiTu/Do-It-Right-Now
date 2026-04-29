@@ -3,8 +3,13 @@ import { useListStore } from '../store/listStore'
 
 const LIST_COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899']
 
-export default function ListManager() {
-  const [showCreate, setShowCreate] = useState(false)
+interface ListManagerProps {
+  isOpen: boolean
+  onClose: () => void
+  onOpen: () => void
+}
+
+export default function ListManager({ isOpen, onClose, onOpen }: ListManagerProps) {
   const [name, setName] = useState('')
   const [selectedColor, setSelectedColor] = useState(LIST_COLORS[0])
   const [error, setError] = useState('')
@@ -15,7 +20,7 @@ export default function ListManager() {
     if (result.success) {
       setName('')
       setError('')
-      setShowCreate(false)
+      onClose()
     } else {
       setError(result.error || '创建失败')
     }
@@ -27,18 +32,20 @@ export default function ListManager() {
     } else if (e.key === 'Escape') {
       setName('')
       setError('')
-      setShowCreate(false)
+      onClose()
     }
   }
 
-  if (!showCreate) {
+  if (!isOpen) {
     return (
-      <button
-        onClick={() => setShowCreate(true)}
-        className="w-full p-3 text-[var(--color-text-light)] hover:text-[var(--color-text)] hover:bg-[var(--color-hover)] rounded-lg transition-colors text-left text-sm"
-      >
-        + 新建分组
-      </button>
+      <div className="p-3 border-t border-[var(--color-border)]">
+        <button
+          onClick={() => onOpen()}
+          className="w-full px-4 py-2.5 rounded-lg border-2 border-dashed border-[var(--color-border)] text-[var(--color-text-light)] hover:border-[var(--color-accent-light)] hover:text-[var(--color-accent)] transition-colors text-sm"
+        >
+          + 新建分组
+        </button>
+      </div>
     )
   }
 
@@ -80,7 +87,7 @@ export default function ListManager() {
           onClick={() => {
             setName('')
             setError('')
-            setShowCreate(false)
+            onClose()
           }}
           className="flex-1 px-3 py-2 bg-[var(--color-bg)] text-[var(--color-text)] border border-[var(--color-border)] rounded-lg hover:bg-[var(--color-hover)] transition-colors text-sm"
         >

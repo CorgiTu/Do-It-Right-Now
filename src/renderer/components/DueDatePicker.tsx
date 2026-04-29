@@ -12,6 +12,8 @@ export default function DueDatePicker({ taskId, dueDate }: DueDatePickerProps) {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [hour, setHour] = useState('12')
   const [minute, setMinute] = useState('00')
+  const [viewYear, setViewYear] = useState(new Date().getFullYear())
+  const [viewMonth, setViewMonth] = useState(new Date().getMonth())
   const updateTaskContent = useTaskStore(state => state.updateTaskContent)
 
   const formatDate = (dateStr: string) => {
@@ -54,12 +56,27 @@ export default function DueDatePicker({ taskId, dueDate }: DueDatePickerProps) {
     setSelectedDate(null)
   }
 
-  const today = new Date()
-  const currentMonth = today.getMonth()
-  const currentYear = today.getFullYear()
+  const prevMonth = () => {
+    if (viewMonth === 0) {
+      setViewMonth(11)
+      setViewYear(viewYear - 1)
+    } else {
+      setViewMonth(viewMonth - 1)
+    }
+  }
 
-  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate()
-  const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay()
+  const nextMonth = () => {
+    if (viewMonth === 11) {
+      setViewMonth(0)
+      setViewYear(viewYear + 1)
+    } else {
+      setViewMonth(viewMonth + 1)
+    }
+  }
+
+  const today = new Date()
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate()
+  const firstDayOfMonth = new Date(viewYear, viewMonth, 1).getDay()
 
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1)
   const paddingDays = Array.from({ length: firstDayOfMonth }, () => 0)
@@ -68,7 +85,15 @@ export default function DueDatePicker({ taskId, dueDate }: DueDatePickerProps) {
     <div className="relative">
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          setIsOpen(!isOpen)
+          if (!isOpen) {
+            setViewYear(today.getFullYear())
+            setViewMonth(today.getMonth())
+            setShowTimePicker(false)
+            setSelectedDate(null)
+          }
+        }}
         className="flex items-center gap-1 text-xs text-[var(--color-text-light)] hover:text-[var(--color-accent)] transition-colors"
       >
         <span className="text-sm opacity-70">📅</span>
@@ -85,20 +110,31 @@ export default function DueDatePicker({ taskId, dueDate }: DueDatePickerProps) {
       {isOpen && (
         <div
           role="dialog"
-          className="absolute z-10 mt-2 p-4 bg-white rounded-xl shadow-lg border border-[var(--color-border)] w-72 animate-fade-in"
+          className="absolute z-10 mt-2 p-4 bg-[var(--color-bg)] rounded-xl shadow-lg border border-[var(--color-border)] w-72 animate-fade-in"
         >
           {!showTimePicker ? (
             <>
               <div className="flex items-center justify-between mb-4">
+                <button
+                  type="button"
+                  onClick={prevMonth}
+                  className="p-1 rounded-lg hover:bg-[var(--color-hover)] transition-colors text-[var(--color-text-light)]"
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="15 18 9 12 15 6" />
+                  </svg>
+                </button>
                 <h3 className="text-sm font-medium text-[var(--color-text)] tracking-wide">
-                  {currentYear}年{currentMonth + 1}月
+                  {viewYear}年{viewMonth + 1}月
                 </h3>
                 <button
                   type="button"
-                  onClick={handleClear}
-                  className="text-xs text-[var(--color-text-light)] hover:text-red-400 transition-colors"
+                  onClick={nextMonth}
+                  className="p-1 rounded-lg hover:bg-[var(--color-hover)] transition-colors text-[var(--color-text-light)]"
                 >
-                  清除日期
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
                 </button>
               </div>
 
@@ -115,7 +151,7 @@ export default function DueDatePicker({ taskId, dueDate }: DueDatePickerProps) {
                   <div key={`pad-${index}`} className="p-2" />
                 ))}
                 {days.map(day => {
-                  const date = new Date(currentYear, currentMonth, day)
+                  const date = new Date(viewYear, viewMonth, day)
                   const isPast = date < new Date(new Date().toDateString())
                   const isToday = date.toDateString() === today.toDateString()
 
@@ -160,7 +196,7 @@ export default function DueDatePicker({ taskId, dueDate }: DueDatePickerProps) {
                   <select
                     value={hour}
                     onChange={(e) => setHour(e.target.value)}
-                    className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-light)]"
+                    className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg bg-[var(--color-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-light)]"
                   >
                     {Array.from({ length: 24 }, (_, i) => i).map(h => (
                       <option key={h} value={String(h).padStart(2, '0')}>
@@ -174,7 +210,7 @@ export default function DueDatePicker({ taskId, dueDate }: DueDatePickerProps) {
                   <select
                     value={minute}
                     onChange={(e) => setMinute(e.target.value)}
-                    className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-light)]"
+                    className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg bg-[var(--color-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-light)]"
                   >
                     {Array.from({ length: 60 }, (_, i) => i).map(m => (
                       <option key={m} value={String(m).padStart(2, '0')}>
