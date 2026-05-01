@@ -8,6 +8,7 @@ interface TaskState {
   loading: boolean
   error: string | null
   selectedTaskIds: string[]
+  tagFilter: string[]
   addTask: (content: string, listId?: string, isRecurring?: boolean) => Promise<void>
   toggleTask: (id: string) => Promise<void>
   updateTaskContent: (id: string, updates: Partial<Todo>) => Promise<void>
@@ -20,6 +21,8 @@ interface TaskState {
   deleteSelectedTasks: () => Promise<void>
   selectedCount: number
   initializeDailyTasks: () => Promise<void>
+  setTagFilter: (tagIds: string[]) => void
+  clearTagFilter: () => void
 }
 
 export const useTaskStore = create<TaskState>((set, get) => ({
@@ -27,6 +30,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   loading: false,
   error: null,
   selectedTaskIds: [],
+  tagFilter: [],
 
   addTask: async (content: string, listId?: string, isRecurring?: boolean) => {
     console.log('[TaskStore] Adding task:', content, 'to list:', listId, 'isRecurring:', isRecurring)
@@ -203,5 +207,13 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     } catch (error) {
       console.error('[TaskStore] Failed to initialize daily tasks:', error)
     }
+  },
+
+  setTagFilter: (tagIds: string[]) => {
+    set({ tagFilter: tagIds })
+  },
+
+  clearTagFilter: () => {
+    set({ tagFilter: [] })
   },
 }))

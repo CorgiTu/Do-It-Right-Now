@@ -4,6 +4,7 @@ import { useTaskStore } from '../store/taskStore'
 import { useDroppable } from '@dnd-kit/core'
 import SortableListItem from './SortableListItem'
 import ListManager from './ListManager'
+import TagCloud from './TagCloud'
 
 interface ListSidebarProps {
   onListSelect: (id: string | 'all') => void
@@ -54,6 +55,10 @@ export default function ListSidebar({ onListSelect }: ListSidebarProps) {
             />
           </div>
         ))}
+
+        <div className="pt-4">
+          <TagCloud />
+        </div>
       </nav>
 
       <ListManager isOpen={showManager} onClose={() => setShowManager(false)} onOpen={() => setShowManager(true)} />

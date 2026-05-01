@@ -29,3 +29,35 @@ export interface TodoList {
 }
 
 export type CreateListInput = Pick<TodoList, 'name' | 'color' | 'icon'> & Partial<Pick<TodoList, 'isDailyList'>>
+
+export interface Tag {
+  id: string
+  name: string
+  color: string
+  usageCount: number
+  createdAt: string
+}
+
+export interface TaskTag {
+  id: string
+  taskId: string
+  tagId: string
+  createdAt: string
+}
+
+export const TAG_COLORS = [
+  '#FF5722',
+  '#E91E63',
+  '#9C27B0',
+  '#673AB7',
+  '#3F51B5',
+  '#2196F3',
+  '#009688',
+  '#4CAF50',
+  '#FF9800',
+  '#795548',
+  '#607D8B',
+  '#8BC34A',
+]
+
+export const DEFAULT_TAG_COLOR = '#FF5722'

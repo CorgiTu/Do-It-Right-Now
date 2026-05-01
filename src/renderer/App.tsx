@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useListStore } from './store/listStore'
 import { useTaskStore } from './store/taskStore'
 import { useThemeStore } from './store/themeStore'
+import { useTagStore } from './store/tagStore'
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, DragOverlay, MeasuringStrategy, DragStartEvent } from '@dnd-kit/core'
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import ListSidebar from './components/ListSidebar'
@@ -19,6 +20,7 @@ export default function App() {
   const { loadLists, selectList, selectedListId, initDefaultList, initDailyList, lists, reorderLists } = useListStore()
   const { loadTasks, tasks, reorderTasks, moveTaskToList, deleteSelectedTasks, clearSelection, initializeDailyTasks } = useTaskStore()
   const { currentThemeId } = useThemeStore()
+  const { loadTags, loadTaskTags, tags } = useTagStore()
   const [showSettings, setShowSettings] = useState(false)
   const [showAddTaskModal, setShowAddTaskModal] = useState(false)
   const { toasts, showToast, removeToast } = useToast()
@@ -34,6 +36,12 @@ export default function App() {
       await loadLists()
       await loadTasks()
       await initializeDailyTasks()
+      await loadTags()
+
+      const loadedTasks = useTaskStore.getState().tasks
+      for (const task of loadedTasks) {
+        await loadTaskTags(task.id)
+      }
     }
     init()
   }, [])

@@ -1,9 +1,11 @@
 import { useState, useRef } from 'react'
 import { useTaskStore } from '../store/taskStore'
+import { useTagStore } from '../store/tagStore'
 import type { Todo } from '../db/types'
 import ConfirmDialog from './ConfirmDialog'
 import DueDatePicker from './DueDatePicker'
 import ReminderPicker from './ReminderPicker'
+import TagPicker from './TagPicker'
 
 interface TaskItemProps {
   task: Todo
@@ -19,8 +21,19 @@ export default function TaskItem({ task, isSelected = false, onToggleComplete, d
   const [editing, setEditing] = useState(false)
   const [editValue, setEditValue] = useState(task.content)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [autoOpenTagPicker, setAutoOpenTagPicker] = useState(false)
   const editRef = useRef<HTMLInputElement>(null)
+  const tagPickerOpenRef = useRef(false)
   const { toggleTaskSelection, updateTaskContent, deleteTask } = useTaskStore()
+  const tags = useTagStore((state) => state.tags)
+  const taskTagMap = useTagStore((state) => state.taskTagMap)
+
+  const taskTagIds = taskTagMap[task.id] || []
+  const displayedTags = taskTagIds
+    .slice(0, 3)
+    .map((id) => tags.find((t) => t.id === id))
+    .filter(Boolean)
+  const remainingCount = Math.max(0, taskTagIds.length - 3)
 
   const handleToggle = () => {
     toggleTaskSelection(task.id)
@@ -45,15 +58,21 @@ export default function TaskItem({ task, isSelected = false, onToggleComplete, d
         updateTaskContent(task.id, { content: trimmed })
       }
       setEditing(false)
+      setAutoOpenTagPicker(false)
     } else if (e.key === 'Escape') {
       setEditValue(task.content)
       setEditing(false)
+      setAutoOpenTagPicker(false)
     }
   }
 
   const handleEditBlur = () => {
+    if (tagPickerOpenRef.current) {
+      return
+    }
     setEditValue(task.content)
     setEditing(false)
+    setAutoOpenTagPicker(false)
   }
 
   const formatDate = (dateStr: string) => {
@@ -91,12 +110,15 @@ export default function TaskItem({ task, isSelected = false, onToggleComplete, d
             : 'bg-white border-[var(--color-border)]'
         } ${dragHandleProps ? 'hover:shadow-lg hover:-translate-y-0.5' : ''}`}
         onContextMenu={handleContextMenu}
+        onDoubleClick={handleDoubleClick}
       >
         {dragHandleProps && (
           <div
             {...dragHandleProps.listeners}
             {...dragHandleProps.attributes}
-            className="drag-handle mt-1 flex-shrink-0 p-1.5 rounded hover:bg-gray-100"
+            className="drag-handle mt-1 flex-shrink-0 p-1.5 rounded hover:bg-gray-100 cursor-grab active:cursor-grabbing"
+            onClick={(e) => e.stopPropagation()}
+            onDoubleClick={(e) => e.stopPropagation()}
             title="拖动排序"
           >
             <svg className="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="currentColor">
@@ -119,20 +141,34 @@ export default function TaskItem({ task, isSelected = false, onToggleComplete, d
         </div>
         <div className="flex-1 min-w-0">
           {editing ? (
-            <input
-              ref={editRef}
-              type="text"
-              value={editValue}
-              onChange={(e) => setEditValue(e.target.value)}
-              onKeyDown={handleEditKeyDown}
-              onBlur={handleEditBlur}
-              className="w-full px-3 py-2 border border-[var(--color-accent-light)] rounded bg-[var(--color-bg)] text-[var(--color-text)] focus:outline-none text-base"
-            />
+            <div className="space-y-2">
+              <input
+                ref={editRef}
+                type="text"
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                onKeyDown={handleEditKeyDown}
+                onBlur={handleEditBlur}
+                className="w-full px-3 py-2 border border-[var(--color-accent-light)] rounded bg-[var(--color-bg)] text-[var(--color-text)] focus:outline-none text-base"
+              />
+              <TagPicker
+                taskId={task.id}
+                currentTagIds={taskTagIds}
+                initialOpen={autoOpenTagPicker}
+                onOpenChange={(open) => {
+                  tagPickerOpenRef.current = open
+                }}
+                onChange={(tagIds) => {
+                  setAutoOpenTagPicker(false)
+                }}
+              />
+            </div>
           ) : (
             <div className="flex items-center gap-2">
               <span
                 onDoubleClick={handleDoubleClick}
-                className={`block ${task.completed ? 'line-through text-[var(--color-text-light)]' : 'text-[var(--color-text)]'}`}
+                className={`block cursor-pointer ${task.completed ? 'line-through text-[var(--color-text-light)]' : 'text-[var(--color-text)]'}`}
+                title="双击编辑"
               >
                 {task.content}
               </span>
@@ -141,13 +177,46 @@ export default function TaskItem({ task, isSelected = false, onToggleComplete, d
                   🔄 每日
                 </span>
               )}
-              {console.log('[TaskItem] Task:', task.content, 'isRecurring:', task.isRecurring)}
             </div>
           )}
           <div className="flex items-center gap-3 mt-2">
             <span className="text-xs text-[var(--color-text-light)] opacity-70">{formatDate(task.createdAt)}</span>
             <DueDatePicker taskId={task.id} dueDate={task.dueDate} />
             <ReminderPicker taskId={task.id} reminder={task.reminder} dueDate={task.dueDate} />
+          </div>
+          <div className="flex flex-wrap gap-1 mt-2">
+            {displayedTags.map((tag) => tag && (
+              <span
+                key={tag.id}
+                className="inline-flex items-center px-2 py-0.5 rounded text-xs text-white"
+                style={{ backgroundColor: tag.color }}
+                title={tag.name}
+              >
+                {tag.name.length > 8 ? `${tag.name.slice(0, 8)}...` : tag.name}
+              </span>
+            ))}
+            {remainingCount > 0 && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-gray-400 text-white">
+                +{remainingCount}
+              </span>
+            )}
+            {!editing && taskTagIds.length < 10 && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  tagPickerOpenRef.current = true
+                  setEditing(true)
+                  setEditValue(task.content)
+                  setAutoOpenTagPicker(true)
+                  setTimeout(() => editRef.current?.focus(), 0)
+                }}
+                className="inline-flex items-center px-2 py-0.5 rounded text-xs border border-dashed border-[var(--color-border)] text-[var(--color-text-light)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-colors"
+                title="添加标签"
+              >
+                + 标签
+              </button>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-2 mt-1">
