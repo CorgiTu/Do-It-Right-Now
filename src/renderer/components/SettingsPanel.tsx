@@ -8,11 +8,7 @@ export default function SettingsPanel() {
   const [dailyListId, setDailyListId] = useState<string | ''>('')
 
   useEffect(() => {
-<<<<<<< HEAD
     const savedDailyListId = localStorage.getItem('do-it-right-now-daily-list-id')
-=======
-    const savedDailyListId = localStorage.getItem('todo-app-daily-list-id')
->>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
     if (savedDailyListId) {
       setDailyListId(savedDailyListId)
     }
@@ -20,15 +16,9 @@ export default function SettingsPanel() {
 
   const handleResetData = async () => {
     try {
-<<<<<<< HEAD
       localStorage.removeItem('do-it-right-now-tasks-v2')
       localStorage.removeItem('do-it-right-now-lists-v2')
       localStorage.removeItem('do-it-right-now-daily-list-id')
-=======
-      localStorage.removeItem('todo-app-tasks-v2')
-      localStorage.removeItem('todo-app-lists-v2')
-      localStorage.removeItem('todo-app-daily-list-id')
->>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
       setResetMessage('数据已重置，页面将刷新')
       setTimeout(() => {
         window.location.reload()
@@ -43,22 +33,14 @@ export default function SettingsPanel() {
     setDailyListId(newListId)
     
     if (newListId) {
-<<<<<<< HEAD
       localStorage.setItem('do-it-right-now-daily-list-id', newListId)
-=======
-      localStorage.setItem('todo-app-daily-list-id', newListId)
->>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
       const list = lists.find(l => l.id === newListId)
       if (list) {
         await updateList(newListId, { isDailyList: true })
       }
       window.location.reload()
     } else {
-<<<<<<< HEAD
       localStorage.removeItem('do-it-right-now-daily-list-id')
-=======
-      localStorage.removeItem('todo-app-daily-list-id')
->>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
       window.location.reload()
     }
   }

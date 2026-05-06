@@ -1,11 +1,7 @@
 import type { TodoList, CreateListInput } from './types'
 import { generateId } from '../utils/uuid'
 
-<<<<<<< HEAD
 const LISTS_KEY = 'do-it-right-now-data'
-=======
-const LISTS_KEY = 'todo-app-data'
->>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
 
 function getLists(): TodoList[] {
   try {

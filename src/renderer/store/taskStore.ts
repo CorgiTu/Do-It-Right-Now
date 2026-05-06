@@ -1,13 +1,8 @@
 import { create } from 'zustand'
 import type { Todo } from '../db/types'
-<<<<<<< HEAD
 import { createTask, getAllTasks, updateTask, deleteTask as deleteTaskFromDb, deleteTasks, markTaskCompletedWithRecurrence, resetRecurringTasksForDailyList, migrateExistingDailyTasks, shouldResetOnCompletion, resetTaskForNextOccurrence } from '../db/tasks'
 import { getDailyList } from '../db/lists'
 import { addTimelineEntry, deleteTimelineByTaskId } from '../db/timeline'
-=======
-import { createTask, getAllTasks, updateTask, deleteTask, deleteTasks, markTaskCompletedWithRecurrence, resetRecurringTasksForDailyList, migrateExistingDailyTasks } from '../db/tasks'
-import { getDailyList } from '../db/lists'
->>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
 
 interface TaskState {
   tasks: Todo[]
@@ -15,10 +10,7 @@ interface TaskState {
   error: string | null
   selectedTaskIds: string[]
   tagFilter: string[]
-<<<<<<< HEAD
   selectedTaskId: string | null
-=======
->>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
   addTask: (content: string, listId?: string, isRecurring?: boolean) => Promise<void>
   toggleTask: (id: string) => Promise<void>
   updateTaskContent: (id: string, updates: Partial<Todo>) => Promise<void>
@@ -33,11 +25,8 @@ interface TaskState {
   initializeDailyTasks: () => Promise<void>
   setTagFilter: (tagIds: string[]) => void
   clearTagFilter: () => void
-<<<<<<< HEAD
   selectTask: (id: string) => Promise<void>
   deselectTask: () => void
-=======
->>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
 }
 
 export const useTaskStore = create<TaskState>((set, get) => ({
@@ -46,10 +35,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   error: null,
   selectedTaskIds: [],
   tagFilter: [],
-<<<<<<< HEAD
   selectedTaskId: null,
-=======
->>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
 
   addTask: async (content: string, listId?: string, isRecurring?: boolean) => {
     console.log('[TaskStore] Adding task:', content, 'to list:', listId, 'isRecurring:', isRecurring)
@@ -64,10 +50,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       set((state) => ({
         tasks: [...state.tasks, task],
       }))
-<<<<<<< HEAD
       await addTimelineEntry(task.id, 'created')
-=======
->>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
     } catch (error) {
       console.error('[TaskStore] Failed to add task:', error)
       throw error
@@ -78,7 +61,6 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     const task = useTaskStore.getState().tasks.find(t => t.id === id)
     if (!task) return
     
-<<<<<<< HEAD
     const wasCompleted = task.completed
     
     if (shouldResetOnCompletion(task)) {
@@ -154,37 +136,10 @@ export const useTaskStore = create<TaskState>((set, get) => ({
         t.id === id
           ? { ...t, ...updates, updatedAt: new Date().toISOString() }
           : t
-=======
-    const newCompleted = !task.completed
-    
-    set((state) => ({
-      tasks: state.tasks.map((task) =>
-        task.id === id
-          ? { 
-              ...task, 
-              completed: newCompleted, 
-              lastCompletedDate: newCompleted ? new Date().toISOString().split('T')[0] : null,
-              updatedAt: new Date().toISOString() 
-            }
-          : task
-      ),
-    }))
-
-    await markTaskCompletedWithRecurrence(id, newCompleted)
-  },
-
-  updateTaskContent: async (id: string, updates: Partial<Todo>) => {
-    set((state) => ({
-      tasks: state.tasks.map((task) =>
-        task.id === id
-          ? { ...task, ...updates, updatedAt: new Date().toISOString() }
-          : task
->>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
       ),
     }))
 
     await updateTask(id, updates)
-<<<<<<< HEAD
     
     if (!hasActualChange) return
     
@@ -206,14 +161,6 @@ export const useTaskStore = create<TaskState>((set, get) => ({
 
     set((state) => ({
       tasks: state.tasks.filter((t) => t.id !== id),
-=======
-  },
-
-  deleteTask: async (id: string) => {
-    await deleteTask(id)
-    set((state) => ({
-      tasks: state.tasks.filter((task) => task.id !== id),
->>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
     }))
   },
 
@@ -307,11 +254,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   initializeDailyTasks: async () => {
     console.log('[TaskStore.initializeDailyTasks] Starting initialization...')
     try {
-<<<<<<< HEAD
       const dailyListId = localStorage.getItem('do-it-right-now-daily-list-id')
-=======
-      const dailyListId = localStorage.getItem('todo-app-daily-list-id')
->>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
       console.log('[TaskStore.initializeDailyTasks] Saved daily list ID:', dailyListId)
       
       let dailyListIdToUse = dailyListId
@@ -345,7 +288,6 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   clearTagFilter: () => {
     set({ tagFilter: [] })
   },
-<<<<<<< HEAD
 
   selectTask: async (id: string) => {
     const currentState = get()
@@ -358,6 +300,4 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   deselectTask: () => {
     set({ selectedTaskId: null })
   },
-=======
->>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
 }))

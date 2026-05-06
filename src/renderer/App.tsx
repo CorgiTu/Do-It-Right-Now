@@ -14,10 +14,7 @@ import FloatingActionButton from './components/FloatingActionButton'
 import AddTaskModal from './components/AddTaskModal'
 import Toast from './components/Toast'
 import TitleBar from './components/TitleBar'
-<<<<<<< HEAD
 import TaskDetailSidebar from './components/TaskDetailSidebar'
-=======
->>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
 import { useToast } from './hooks/useToast'
 import type { Todo } from './db/types'
 
@@ -281,10 +278,7 @@ export default function App() {
           listId={selectedListId === 'all' ? undefined : selectedListId}
         />
         <Toast toasts={toasts} onClose={removeToast} />
-<<<<<<< HEAD
         <TaskDetailSidebar showToast={showToast} />
-=======
->>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
 
         {/* 
          * 拖拽覆盖层 - 脱离文档流的拖拽项

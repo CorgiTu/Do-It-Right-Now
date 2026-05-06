@@ -1,10 +1,7 @@
 import { useEffect } from 'react'
 import { useTaskStore } from '../store/taskStore'
 import { useListStore } from '../store/listStore'
-<<<<<<< HEAD
 import { useTagStore } from '../store/tagStore'
-=======
->>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import TaskItem from './TaskItem'
@@ -67,17 +64,13 @@ function SortableTaskItemAllView({ task }: { task: Todo }) {
 export default function TaskListAllView() {
   const { tasks, loadTasks } = useTaskStore()
   const { lists } = useListStore()
-<<<<<<< HEAD
   const selectedTagIds = useTagStore((state) => state.selectedTagIds)
   const taskTagMap = useTagStore((state) => state.taskTagMap)
-=======
->>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
 
   useEffect(() => {
     loadTasks()
   }, [])
 
-<<<<<<< HEAD
   const filteredTasks = selectedTagIds.length > 0
     ? tasks.filter(task => {
         const taskTags = taskTagMap[task.id] || []
@@ -99,19 +92,6 @@ export default function TaskListAllView() {
         <p className="text-sm mt-2 opacity-60">
           {selectedTagIds.length > 0 ? '请尝试清除标签筛选' : '添加新任务开始使用'}
         </p>
-=======
-  // 过滤出有任务的分组
-  const listsWithTasks = lists.filter(list => 
-    tasks.some(task => task.listId === list.id)
-  )
-
-  if (tasks.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center h-64 text-[var(--color-text-light)]">
-        <div className="text-6xl mb-4 opacity-30">✓</div>
-        <p className="text-base font-light tracking-wide">暂无任务</p>
-        <p className="text-sm mt-2 opacity-60">添加新任务开始使用</p>
->>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
       </div>
     )
   }
@@ -119,11 +99,7 @@ export default function TaskListAllView() {
   return (
     <div className="flex flex-col gap-8">
       {listsWithTasks.map(list => {
-<<<<<<< HEAD
         const listTasks = filteredTasks.filter(task => task.listId === list.id)
-=======
-        const listTasks = tasks.filter(task => task.listId === list.id)
->>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
         const incompleteTasks = listTasks.filter(task => !task.completed)
         const completedTasks = listTasks.filter(task => task.completed)
 

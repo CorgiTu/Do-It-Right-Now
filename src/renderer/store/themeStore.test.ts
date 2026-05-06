@@ -11,11 +11,7 @@ describe('themeStore', () => {
   it('切换主题并保存到 localStorage', () => {
     useThemeStore.getState().switchTheme('bright')
     expect(useThemeStore.getState().currentThemeId).toBe('bright')
-<<<<<<< HEAD
     expect(localStorage.getItem('do-it-right-now-theme')).toBe('bright')
-=======
-    expect(localStorage.getItem('todo-app-theme')).toBe('bright')
->>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
   })
 
   it('切换主题时应用 CSS 变量到 document root', () => {

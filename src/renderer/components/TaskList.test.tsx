@@ -8,7 +8,6 @@ vi.mock('../store/taskStore', () => ({
   useTaskStore: vi.fn(),
 }))
 
-<<<<<<< HEAD
 vi.mock('../store/subtaskStore', () => ({
   useSubtaskStore: vi.fn(() => ({
     loadSubtasks: vi.fn(),
@@ -16,9 +15,6 @@ vi.mock('../store/subtaskStore', () => ({
     subtaskMap: {},
   })),
 }))
-
-=======
->>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
 const mockTasks: Todo[] = [
   {
     id: '1',
@@ -30,14 +26,11 @@ const mockTasks: Todo[] = [
     order: 0,
     createdAt: '2024-01-01T00:00:00.000Z',
     updatedAt: '2024-01-01T00:00:00.000Z',
-<<<<<<< HEAD
     isRecurring: false,
     recurrencePattern: null,
     lastCompletedDate: null,
     originalTaskId: null,
     autoCompleteOnSubtasksDone: false,
-=======
->>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
   },
   {
     id: '2',
@@ -49,14 +42,11 @@ const mockTasks: Todo[] = [
     order: 1,
     createdAt: '2024-01-01T00:01:00.000Z',
     updatedAt: '2024-01-01T00:01:00.000Z',
-<<<<<<< HEAD
     isRecurring: false,
     recurrencePattern: null,
     lastCompletedDate: null,
     originalTaskId: null,
     autoCompleteOnSubtasksDone: false,
-=======
->>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
   },
   {
     id: '3',
@@ -68,14 +58,11 @@ const mockTasks: Todo[] = [
     order: 2,
     createdAt: '2024-01-01T00:02:00.000Z',
     updatedAt: '2024-01-01T00:02:00.000Z',
-<<<<<<< HEAD
     isRecurring: false,
     recurrencePattern: null,
     lastCompletedDate: null,
     originalTaskId: null,
     autoCompleteOnSubtasksDone: false,
-=======
->>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
   },
 ]
 

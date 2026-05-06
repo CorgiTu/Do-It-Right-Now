@@ -15,14 +15,11 @@ const mockTask: Todo = {
   order: 0,
   createdAt: '2024-01-01T00:00:00.000Z',
   updatedAt: '2024-01-01T00:00:00.000Z',
-<<<<<<< HEAD
   isRecurring: false,
   recurrencePattern: null,
   lastCompletedDate: null,
   originalTaskId: null,
   autoCompleteOnSubtasksDone: false,
-=======
->>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
 }
 
 const mockToggleTask = vi.fn()
@@ -47,7 +44,6 @@ vi.mock('../store/tagStore', () => {
   }
 })
 
-<<<<<<< HEAD
 vi.mock('../store/subtaskStore', () => ({
   useSubtaskStore: vi.fn(() => ({
     loadSubtasks: vi.fn(),
@@ -55,9 +51,6 @@ vi.mock('../store/subtaskStore', () => ({
     subtaskMap: {},
   })),
 }))
-
-=======
->>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
 describe('TaskItem', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -88,19 +81,11 @@ describe('TaskItem', () => {
     const completedTask: Todo = {
       ...mockTask,
       completed: true,
-<<<<<<< HEAD
-=======
-      completedAt: '2024-01-01T12:00:00.000Z',
->>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
     }
 
     render(<TaskItem task={completedTask} />)
 
     expect(screen.getByText('测试任务')).toHaveClass('line-through')
-<<<<<<< HEAD
-=======
-    expect(screen.getByText('测试任务')).toHaveClass('opacity-60')
->>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
   })
 
   it('should show due date when set', () => {
@@ -170,11 +155,7 @@ describe('TaskItem', () => {
     fireEvent.change(input, { target: { value: '新任务内容' } })
     fireEvent.keyDown(input, { key: 'Enter' })
 
-<<<<<<< HEAD
     expect(mockUpdateTaskContent).toHaveBeenCalledWith('test-id', { content: '新任务内容' })
-=======
-    expect(mockUpdateTaskContent).toHaveBeenCalledWith('test-id', '新任务内容')
->>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
   })
 
   it('should call updateTaskContent when editing and input blur', () => {
@@ -187,11 +168,7 @@ describe('TaskItem', () => {
     fireEvent.change(input, { target: { value: '新任务内容' } })
     fireEvent.blur(input)
 
-<<<<<<< HEAD
     expect(mockUpdateTaskContent).toHaveBeenCalledWith('test-id', { content: '新任务内容' })
-=======
-    expect(mockUpdateTaskContent).toHaveBeenCalledWith('test-id', '新任务内容')
->>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
   })
 
   it('should keep editing mode when content is empty on blur', () => {
@@ -288,11 +265,7 @@ describe('TaskItem', () => {
       const state = {
         tags: mockTags,
         taskTagMap: { 'test-id': ['tag-1', 'tag-2'] },
-<<<<<<< HEAD
         getTaskTags: () => ['tag-1', 'tag-2'],
-=======
-        getTaskTags: (taskId: string) => ['tag-1', 'tag-2'],
->>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
       }
       return selector ? selector(state) : state
     })
@@ -317,11 +290,7 @@ describe('TaskItem', () => {
       const state = {
         tags: mockTags,
         taskTagMap: { 'test-id': ['tag-1', 'tag-2', 'tag-3', 'tag-4', 'tag-5'] },
-<<<<<<< HEAD
         getTaskTags: () => ['tag-1', 'tag-2', 'tag-3', 'tag-4', 'tag-5'],
-=======
-        getTaskTags: (taskId: string) => ['tag-1', 'tag-2', 'tag-3', 'tag-4', 'tag-5'],
->>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
       }
       return selector ? selector(state) : state
     })
