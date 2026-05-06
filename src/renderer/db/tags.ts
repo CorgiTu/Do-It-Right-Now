@@ -2,8 +2,13 @@ import type { Tag, TaskTag } from './types'
 import { generateId } from '../utils/uuid'
 import { DEFAULT_TAG_COLOR, TAG_COLORS } from './types'
 
+<<<<<<< HEAD
 const TAGS_KEY = 'do-it-right-now-tags'
 const TASK_TAGS_KEY = 'do-it-right-now-task-tags'
+=======
+const TAGS_KEY = 'todo-app-tags'
+const TASK_TAGS_KEY = 'todo-app-task-tags'
+>>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
 
 function getTags(): Tag[] {
   try {

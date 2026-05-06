@@ -1,5 +1,9 @@
 {
+<<<<<<< HEAD
   "name": "do-it-right-now",
+=======
+  "name": "todo-app",
+>>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
   "version": "1.0.0",
   "type": "module",
   "description": "A modern todo desktop application built with Electron, React, and TypeScript",
@@ -21,11 +25,20 @@
     "@types/react-dom": "^18.2.0",
     "@vitejs/plugin-react": "^4.2.0",
     "@vitest/browser": "^4.1.5",
+<<<<<<< HEAD
+=======
+    "autoprefixer": "^10.4.16",
+>>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
     "concurrently": "^8.2.2",
     "electron": "^28.0.0",
     "fake-indexeddb": "^6.2.5",
     "jsdom": "^29.0.2",
     "playwright": "^1.59.1",
+<<<<<<< HEAD
+=======
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.4.0",
+>>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
     "typescript": "^5.3.0",
     "vite": "^5.0.0",
     "vite-plugin-electron": "^0.28.0",

@@ -11,7 +11,10 @@ import {
   getTagsByTaskId as dbGetTagsByTaskId,
 } from '../db/tags'
 import { DEFAULT_TAG_COLOR } from '../db/types'
+<<<<<<< HEAD
 import { addTimelineEntry } from '../db/timeline'
+=======
+>>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
 
 interface TagState {
   tags: Tag[]

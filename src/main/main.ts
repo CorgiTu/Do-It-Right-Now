@@ -28,7 +28,11 @@ const createWindow = () => {
       nodeIntegration: false,
       contextIsolation: true,
       webSecurity: false, // 允许跨域资源
+<<<<<<< HEAD
       partition: 'persist:do-it-right-now',
+=======
+      partition: 'persist:todo-app',
+>>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
       // 禁用阴影以优化动画性能
       hasShadow: false,
     },

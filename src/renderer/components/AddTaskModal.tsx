@@ -16,7 +16,11 @@ export default function AddTaskModal({ isOpen, onClose, listId }: AddTaskModalPr
   useEffect(() => {
     const checkDailyList = async () => {
       if (listId) {
+<<<<<<< HEAD
         const savedDailyListId = localStorage.getItem('do-it-right-now-daily-list-id')
+=======
+        const savedDailyListId = localStorage.getItem('todo-app-daily-list-id')
+>>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
         const isDaily = savedDailyListId === listId
         setIsDailyList(isDaily)
       } else {

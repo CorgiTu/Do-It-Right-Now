@@ -1,9 +1,14 @@
 import type { Todo, CreateTodoInput } from './types'
 import { generateId } from '../utils/uuid'
 import { getAllLists, createDefaultList } from './lists'
+<<<<<<< HEAD
 import { calculateNextOccurrenceDate } from '../utils/recurrence'
 
 const TASKS_KEY = 'do-it-right-now-tasks-v2'
+=======
+
+const TASKS_KEY = 'todo-app-tasks-v2'
+>>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
 
 function getTasks(): Todo[] {
   try {
@@ -71,12 +76,15 @@ export async function createTask(input: CreateTodoInput): Promise<Todo> {
     recurrencePattern: input.recurrencePattern ?? null,
     lastCompletedDate: input.lastCompletedDate ?? null,
     originalTaskId: input.originalTaskId ?? null,
+<<<<<<< HEAD
     autoCompleteOnSubtasksDone: input.autoCompleteOnSubtasksDone ?? false,
     endDate: input.endDate ?? null,
     maxOccurrences: input.maxOccurrences ?? null,
     occurrenceCount: input.occurrenceCount ?? 0,
     exceptionDates: input.exceptionDates ?? [],
     notes: input.notes ?? null,
+=======
+>>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
   }
 
   console.log('[tasks.createTask] Attempting to save task:', task)
@@ -234,6 +242,7 @@ export async function migrateExistingDailyTasks(listId: string): Promise<void> {
     console.log('[tasks.migrateExistingDailyTasks] Migrated tasks in list', listId, 'to recurring')
   }
 }
+<<<<<<< HEAD
 
 export function shouldResetOnCompletion(task: Todo): boolean {
   if (!task.isRecurring) {
@@ -274,3 +283,5 @@ export function resetTaskForNextOccurrence(task: Todo): Todo {
     updatedAt: new Date().toISOString(),
   }
 }
+=======
+>>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f

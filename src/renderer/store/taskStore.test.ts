@@ -8,7 +8,10 @@ describe('taskStore', () => {
       tasks: [],
       loading: false,
       error: null,
+<<<<<<< HEAD
       selectedTaskId: null,
+=======
+>>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
     })
   })
 
@@ -63,6 +66,7 @@ describe('taskStore', () => {
       const revertedTasks = useTaskStore.getState().tasks
       expect(revertedTasks.find(t => t.id === taskId)?.completed).toBe(false)
     })
+<<<<<<< HEAD
 
     it('should reset recurring task instead of marking as completed', async () => {
       const { addTask, toggleTask } = useTaskStore.getState()
@@ -95,6 +99,8 @@ describe('taskStore', () => {
       // Occurrence count should increment
       expect(updatedTask?.occurrenceCount).toBe(1)
     })
+=======
+>>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
   })
 
   describe('updateTask', () => {
@@ -125,6 +131,7 @@ describe('taskStore', () => {
     })
   })
 
+<<<<<<< HEAD
   describe('sidebar state management', () => {
     beforeEach(() => {
       useTaskStore.setState({
@@ -175,6 +182,8 @@ describe('taskStore', () => {
     })
   })
 
+=======
+>>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
   describe('task selection management', () => {
     beforeEach(() => {
       useTaskStore.setState({

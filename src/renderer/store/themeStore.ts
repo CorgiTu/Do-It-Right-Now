@@ -2,7 +2,11 @@ import { create } from 'zustand'
 import { themes, DEFAULT_THEME_ID, getThemeById } from '../config/themes'
 import type { ThemeColors } from '../types/theme'
 
+<<<<<<< HEAD
 const THEME_STORAGE_KEY = 'do-it-right-now-theme'
+=======
+const THEME_STORAGE_KEY = 'todo-app-theme'
+>>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
 
 interface ThemeStore {
   currentThemeId: string

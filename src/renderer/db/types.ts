@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 export type RecurrencePattern = 'daily' | 'weekly' | 'monthly' | 'yearly' | 'custom' | null
 
 export interface RecurrenceRule {
@@ -9,6 +10,9 @@ export interface RecurrenceRule {
   maxOccurrences?: number | null
   exceptionDates?: string[]
 }
+=======
+export type RecurrencePattern = 'daily' | 'weekly' | 'monthly' | 'yearly' | null
+>>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
 
 export interface Todo {
   id: string
@@ -24,6 +28,7 @@ export interface Todo {
   recurrencePattern: RecurrencePattern
   lastCompletedDate: string | null
   originalTaskId: string | null
+<<<<<<< HEAD
   autoCompleteOnSubtasksDone: boolean
   endDate: string | null
   maxOccurrences: number | null
@@ -54,6 +59,11 @@ export interface TimelineEntry {
 }
 
 export type CreateTodoInput = Pick<Todo, 'content'> & Partial<Omit<Todo, 'id' | 'content' | 'order' | 'createdAt' | 'updatedAt'>>
+=======
+}
+
+export type CreateTodoInput = Pick<Todo, 'content'> & Partial<Omit<Todo, 'id' | 'content' | 'completed' | 'order' | 'createdAt' | 'updatedAt'>>
+>>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
 
 export interface TodoList {
   id: string
@@ -82,6 +92,7 @@ export interface TaskTag {
   createdAt: string
 }
 
+<<<<<<< HEAD
 export interface Subtask {
   id: string
   taskId: string
@@ -94,6 +105,8 @@ export interface Subtask {
 
 export type CreateSubtaskInput = Pick<Subtask, 'taskId' | 'content'> & Partial<Pick<Subtask, 'id' | 'order' | 'createdAt' | 'updatedAt'>>
 
+=======
+>>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
 export const TAG_COLORS = [
   '#FF5722',
   '#E91E63',

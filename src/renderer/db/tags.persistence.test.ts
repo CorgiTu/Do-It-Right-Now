@@ -30,7 +30,11 @@ describe('Tag Persistence (T12)', () => {
     expect(tags).toHaveLength(1)
     expect(tags[0].name).toBe('持久化标签')
 
+<<<<<<< HEAD
     const storedData = localStorage.getItem('do-it-right-now-tags')
+=======
+    const storedData = localStorage.getItem('todo-app-tags')
+>>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
     expect(storedData).not.toBeNull()
     const parsed = JSON.parse(storedData!)
     expect(parsed).toHaveLength(1)
@@ -41,7 +45,11 @@ describe('Tag Persistence (T12)', () => {
     const tag = await createTag({ name: '原始名称', color: '#FF5722' })
     await updateTag(tag.id, { name: '更新名称', color: '#4CAF50' })
 
+<<<<<<< HEAD
     const storedData = localStorage.getItem('do-it-right-now-tags')
+=======
+    const storedData = localStorage.getItem('todo-app-tags')
+>>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
     const parsed = JSON.parse(storedData!)
     expect(parsed[0].name).toBe('更新名称')
     expect(parsed[0].color).toBe('#4CAF50')
@@ -54,7 +62,11 @@ describe('Tag Persistence (T12)', () => {
     const tags = await getAllTags()
     expect(tags).toHaveLength(0)
 
+<<<<<<< HEAD
     const storedData = localStorage.getItem('do-it-right-now-tags')
+=======
+    const storedData = localStorage.getItem('todo-app-tags')
+>>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
     const parsed = JSON.parse(storedData!)
     expect(parsed).toHaveLength(0)
   })
@@ -63,7 +75,11 @@ describe('Tag Persistence (T12)', () => {
     const tag = await createTag({ name: '关联标签', color: '#FF5722' })
     await addTagToTask('persist-task-1', tag.id)
 
+<<<<<<< HEAD
     const storedTaskTags = localStorage.getItem('do-it-right-now-task-tags')
+=======
+    const storedTaskTags = localStorage.getItem('todo-app-task-tags')
+>>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
     expect(storedTaskTags).not.toBeNull()
     const parsed = JSON.parse(storedTaskTags!)
     expect(parsed).toHaveLength(1)
@@ -83,7 +99,11 @@ describe('Tag Persistence (T12)', () => {
     const tagsAfterRemove = await getAllTags()
     expect(tagsAfterRemove[0].usageCount).toBe(0)
 
+<<<<<<< HEAD
     const storedData = localStorage.getItem('do-it-right-now-tags')
+=======
+    const storedData = localStorage.getItem('todo-app-tags')
+>>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
     const parsed = JSON.parse(storedData!)
     expect(parsed[0].usageCount).toBe(0)
   })

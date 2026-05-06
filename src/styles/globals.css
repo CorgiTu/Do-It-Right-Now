@@ -70,10 +70,13 @@ body {
   animation: slideUp 0.3s ease-out;
 }
 
+<<<<<<< HEAD
 .animate-slide-in-right {
   animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+=======
+>>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
 .animate-bounce-subtle {
   animation: bounceSubtle 0.3s ease-out;
 }
@@ -98,6 +101,7 @@ body {
   }
 }
 
+<<<<<<< HEAD
 @keyframes slideInRight {
   from {
     transform: translateX(100%);
@@ -107,6 +111,8 @@ body {
   }
 }
 
+=======
+>>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
 @keyframes bounceSubtle {
   0%, 100% {
     transform: scale(1);

@@ -63,6 +63,7 @@ export default function TagPicker({ taskId, currentTagIds, onChange, initialOpen
     }
   }, [isOpen])
 
+<<<<<<< HEAD
   const updatePosition = () => {
     if (!isOpen || !buttonRef.current) return
     const rect = buttonRef.current.getBoundingClientRect()
@@ -128,6 +129,20 @@ export default function TagPicker({ taskId, currentTagIds, onChange, initialOpen
       })
     }
 
+=======
+  const handleToggle = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    if (!isOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect()
+      setPosition({
+        top: rect.bottom + 8,
+        left: rect.left,
+      })
+    }
+    
+>>>>>>> c8da83c05226073247d160e91e3e7c9a773d138f
     const nextOpen = !isOpen
     setIsOpen(nextOpen)
     setSearchValue('')
