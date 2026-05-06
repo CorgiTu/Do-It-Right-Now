@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useListStore } from './store/listStore'
 import { useTaskStore } from './store/taskStore'
+import { fixCorruptedRecurringData } from './dataMigration'
 import { useThemeStore } from './store/themeStore'
 import { useTagStore } from './store/tagStore'
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, DragOverlay, MeasuringStrategy, DragStartEvent } from '@dnd-kit/core'
@@ -40,6 +41,8 @@ export default function App() {
       await loadLists()
       await loadTasks()
       await initializeDailyTasks()
+      fixCorruptedRecurringData()
+      await loadTasks()
       await loadTags()
 
       const loadedTasks = useTaskStore.getState().tasks

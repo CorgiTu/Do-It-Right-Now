@@ -276,10 +276,13 @@ export function resetTaskForNextOccurrence(task: Todo): Todo {
 
   return {
     ...task,
+    id: generateId(),
+    originalTaskId: task.originalTaskId || task.id,
     completed: false,
     dueDate: nextDueDate,
-    occurrenceCount: task.occurrenceCount + 1,
+    occurrenceCount: 0,
     lastCompletedDate: null,
+    createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   }
 }
