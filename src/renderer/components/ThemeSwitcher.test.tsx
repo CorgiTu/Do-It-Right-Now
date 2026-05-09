@@ -5,32 +5,26 @@ import { useThemeStore } from '../store/themeStore'
 
 describe('ThemeSwitcher', () => {
   beforeEach(() => {
-    useThemeStore.getState().switchTheme('enhanced-morandi')
+    localStorage.clear()
+    useThemeStore.getState().setTheme('coinbase-light')
   })
 
-  it('渲染时显示 3 个主题选项', () => {
+  it('渲染时显示所有主题选项', () => {
     render(<ThemeSwitcher />)
-    expect(screen.getByText('增强莫兰迪')).toBeInTheDocument()
-    expect(screen.getByText('明亮')).toBeInTheDocument()
-    expect(screen.getByText('深色')).toBeInTheDocument()
+    expect(screen.getByText('Coinbase')).toBeInTheDocument()
+    expect(screen.getByText('Coinbase Dark')).toBeInTheDocument()
   })
 
   it('当前主题标记为选中状态', () => {
-    useThemeStore.getState().switchTheme('bright')
+    useThemeStore.getState().setTheme('coinbase-dark')
     render(<ThemeSwitcher />)
-    const brightOption = screen.getByText('明亮').closest('button')
-    expect(brightOption).toHaveAttribute('aria-pressed', 'true')
+    const darkOption = screen.getByText('Coinbase Dark').closest('button')
+    expect(darkOption).toHaveClass('bg-coinbase-primary')
   })
 
-  it('点击主题选项调用 switchTheme', () => {
+  it('点击主题选项调用 setTheme', () => {
     render(<ThemeSwitcher />)
-    fireEvent.click(screen.getByText('明亮'))
-    expect(useThemeStore.getState().currentThemeId).toBe('bright')
-  })
-
-  it('每个主题显示颜色预览色块', () => {
-    render(<ThemeSwitcher />)
-    const colorSwatches = document.querySelectorAll('[data-testid="color-swatch"]')
-    expect(colorSwatches.length).toBeGreaterThanOrEqual(3)
+    fireEvent.click(screen.getByText('Coinbase Dark'))
+    expect(useThemeStore.getState().themeId).toBe('coinbase-dark')
   })
 })

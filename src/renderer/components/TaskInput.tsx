@@ -37,27 +37,29 @@ export default function TaskInput({ listId }: TaskInputProps) {
   const remaining = MAX_LENGTH - value.length
 
   return (
-    <div className="flex flex-col gap-3 p-5 bg-white rounded-lg shadow-sm border border-[var(--color-border)] mb-6 animate-slide-up">
+    <div className="flex flex-col gap-3 p-5 bg-coinbase-surface-card rounded-coinbase-lg shadow-coinbase-soft border border-coinbase-hairline mb-6 animate-slide-up">
       <div className="flex gap-3">
-        <input
-          ref={inputRef}
-          type="text"
-          value={value}
-          onChange={handleChange}
-          onKeyDown={handleKeyDown}
-          placeholder="添加新任务..."
-          className="flex-1 px-4 py-3 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent-light)] text-[var(--color-text)] placeholder-[var(--color-text-light)] transition-all duration-200"
-          maxLength={MAX_LENGTH}
-        />
+        <div className="flex-1 relative">
+          <input
+            ref={inputRef}
+            type="text"
+            value={value}
+            onChange={handleChange}
+            onKeyDown={handleKeyDown}
+            placeholder="添加新任务..."
+            className="w-full px-4 py-2.5 bg-coinbase-surface-soft border border-coinbase-hairline rounded-coinbase-lg text-coinbase-body placeholder-coinbase-muted-soft transition-all duration-200"
+            maxLength={MAX_LENGTH}
+          />
+        </div>
         <button
           onClick={handleSubmit}
-          className="px-6 py-3 bg-[var(--color-accent)] text-white rounded-lg hover:bg-[var(--color-accent-hover)] transition-colors duration-200 text-sm font-medium tracking-wide"
+          className="px-6 py-2.5 bg-coinbase-primary text-coinbase-on-primary rounded-coinbase-pill hover:bg-coinbase-primary-active transition-colors duration-200 text-sm font-semibold"
         >
           添加
         </button>
       </div>
       {value.length > 150 && (
-        <span className={`text-xs ${remaining <= 0 ? 'text-red-400' : 'text-[var(--color-text-light)]'}`}>
+        <span className={`text-xs px-1 ${remaining <= 0 ? 'text-coinbase-semantic-down' : 'text-coinbase-muted'}`}>
           剩余 {remaining} 字符
         </span>
       )}

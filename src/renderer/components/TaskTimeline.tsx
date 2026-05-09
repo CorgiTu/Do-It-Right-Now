@@ -41,11 +41,11 @@ export default function TaskTimeline({ taskId }: TaskTimelineProps) {
 
   const formatActionDetail = (entry: TimelineEntry): string => {
     if (!entry.beforeValue || !entry.afterValue) return ''
-    
+
     try {
       const before = JSON.parse(entry.beforeValue)
       const after = JSON.parse(entry.afterValue)
-      
+
       switch (entry.actionType) {
         case 'content_edit':
           if (before.content && after.content) {
@@ -80,14 +80,13 @@ export default function TaskTimeline({ taskId }: TaskTimelineProps) {
           break
       }
     } catch (e) {
-      // ignore parse errors
     }
     return ''
   }
 
   if (entries.length === 0) {
     return (
-      <div className="text-sm text-[var(--color-text-light)] py-4 text-center">
+      <div className="text-sm text-coinbase-muted py-4 text-center">
         暂无操作记录
       </div>
     )
@@ -98,18 +97,18 @@ export default function TaskTimeline({ taskId }: TaskTimelineProps) {
       {entries.map((entry) => (
         <div
           key={entry.id}
-          className="flex items-start gap-3 text-sm pb-3 border-b border-[var(--color-border)] last:border-b-0"
+          className="flex items-start gap-3 text-sm pb-3 border-b border-coinbase-hairline-soft last:border-b-0"
         >
-          <div className="flex-shrink-0 w-2 h-2 rounded-full bg-[var(--color-accent)] mt-1.5" />
+          <div className="flex-shrink-0 w-2 h-2 rounded-coinbase-full bg-coinbase-primary mt-1.5" />
           <div className="flex-1 min-w-0">
-            <div className="text-[var(--color-text)] font-medium">
+            <div className="text-coinbase-body-strong font-medium">
               {ACTION_LABELS[entry.actionType] || entry.actionType}
             </div>
-            <div className="text-xs text-[var(--color-text-light)] mt-0.5">
+            <div className="text-xs text-coinbase-muted-soft mt-0.5">
               {formatTime(entry.createdAt)}
             </div>
             {formatActionDetail(entry) && (
-              <div className="text-xs text-[var(--color-text-light)] mt-1 truncate">
+              <div className="text-xs text-coinbase-muted mt-1 truncate">
                 {formatActionDetail(entry)}
               </div>
             )}

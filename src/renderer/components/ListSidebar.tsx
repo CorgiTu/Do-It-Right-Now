@@ -24,24 +24,24 @@ export default function ListSidebar({ onListSelect }: ListSidebarProps) {
   }
 
   return (
-    <aside className="w-72 bg-[var(--color-bg-secondary)] border-r border-[var(--color-border)] flex flex-col shadow-sm">
-      <div className="p-4 border-b border-[var(--color-border)]">
-        <h2 className="text-lg font-semibold text-[var(--color-text)] tracking-wide">待办清单</h2>
+    <aside className="w-72 bg-gray-50/80 flex flex-col">
+      <div className="p-5 border-b border-gray-200/60">
+        <h2 className="text-lg font-semibold text-coinbase-ink">待办清单</h2>
       </div>
 
-      <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+      <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
         <div ref={setNodeRef}>
           <button
             onClick={() => onListSelect('all')}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left group ${
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-coinbase-sm transition-all text-left group ${
               selectedListId === 'all'
-                ? 'bg-[var(--color-accent-light)] bg-opacity-60 text-[var(--color-text)]'
-                : 'hover:bg-[var(--color-hover)] text-[var(--color-text-light)] hover:text-[var(--color-text)]'
+                ? 'bg-coinbase-primary/10 text-coinbase-ink font-medium'
+                : 'hover:bg-coinbase-surface-strong text-coinbase-muted hover:text-coinbase-body'
             }`}
           >
             <span className="text-lg"></span>
             <span className="text-sm truncate">全部任务</span>
-            <span className="text-xs opacity-70 ml-auto">{tasks.filter(t => !t.completed).length}</span>
+            <span className="text-xs text-gray-400 ml-auto">{tasks.filter(t => !t.completed).length}</span>
           </button>
         </div>
 

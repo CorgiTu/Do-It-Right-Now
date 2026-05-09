@@ -1,92 +1,53 @@
-import { useState, useEffect } from 'react'
 import ThemeSwitcher from './ThemeSwitcher'
 import { useListStore } from '../store/listStore'
+import { useTaskStore } from '../store/taskStore'
 
 export default function SettingsPanel() {
-  const [resetMessage, setResetMessage] = useState('')
-  const { lists, updateList } = useListStore()
-  const [dailyListId, setDailyListId] = useState<string | ''>('')
+  const { lists } = useListStore()
+  const { initializeDailyTasks } = useTaskStore()
 
-  useEffect(() => {
-    const savedDailyListId = localStorage.getItem('do-it-right-now-daily-list-id')
-    if (savedDailyListId) {
-      setDailyListId(savedDailyListId)
-    }
-  }, [])
-
-  const handleResetData = async () => {
-    try {
-      localStorage.removeItem('do-it-right-now-tasks-v2')
-      localStorage.removeItem('do-it-right-now-lists-v2')
-      localStorage.removeItem('do-it-right-now-daily-list-id')
-      setResetMessage('数据已重置，页面将刷新')
-      setTimeout(() => {
-        window.location.reload()
-      }, 1500)
-    } catch (error) {
-      setResetMessage('重置失败：' + (error as Error).message)
-    }
-  }
-
-  const handleDailyListChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newListId = e.target.value
-    setDailyListId(newListId)
-    
-    if (newListId) {
-      localStorage.setItem('do-it-right-now-daily-list-id', newListId)
-      const list = lists.find(l => l.id === newListId)
-      if (list) {
-        await updateList(newListId, { isDailyList: true })
-      }
-      window.location.reload()
-    } else {
-      localStorage.removeItem('do-it-right-now-daily-list-id')
+  const handleResetData = () => {
+    if (window.confirm('确定要重置所有数据吗？此操作不可恢复。')) {
+      localStorage.clear()
       window.location.reload()
     }
   }
 
   return (
-    <div className="p-6">
-      <h3 className="text-lg font-semibold mb-4 text-[var(--color-text)]">主题设置</h3>
+    <div className="p-6 space-y-6">
       <ThemeSwitcher />
-      
-      <div className="mt-6 pt-6 border-t border-t border-[var(--color-border)]">
-        <h3 className="text-lg font-semibold mb-4 text-[var(--color-text)]">每日任务设置</h3>
-        <div className="space-y-3">
-          <div>
-            <label className="block text-sm font-medium text-[var(--color-text)] mb-2">
-              指定每日任务分组
-            </label>
-            <select
-              value={dailyListId}
-              onChange={handleDailyListChange}
-              className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg bg-[var(--color-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+
+      <div className="pt-4 border-t border-gray-200/60">
+        <h3 className="text-sm font-semibold text-coinbase-ink mb-2 px-1">工作日任务设置</h3>
+        <p className="text-xs text-gray-400 mb-3 px-1">选择需要自动生成每日任务的工作日</p>
+        <div className="flex gap-2">
+          {['一', '二', '三', '四', '五', '六', '日'].map((day, i) => (
+            <label
+              key={day}
+              className="w-10 h-10 flex items-center justify-center rounded-lg text-sm font-medium cursor-pointer transition-colors bg-gray-100 text-gray-600 hover:bg-gray-200"
             >
-              <option value="">不设置每日任务分组</option>
-              {lists.map(list => (
-                <option key={list.id} value={list.id}>
-                  {list.name} {list.isDailyList ? '✓' : ''}
-                </option>
-              ))}
-            </select>
-            <p className="mt-2 text-xs text-[var(--color-text-light)]">
-              💡 被指定的分组中的任务将自动设置为每日重复，每天自动重置完成状态
-            </p>
-          </div>
+              <input
+                type="checkbox"
+                className="sr-only"
+                checked={[0, 1, 2, 3, 4].includes(i)}
+                onChange={() => { }}
+              />
+              {day}
+            </label>
+          ))}
         </div>
       </div>
-      
-      <div className="mt-6 pt-6 border-t border-[var(--color-border)]">
-        <h3 className="text-lg font-semibold mb-4 text-[var(--color-text)]">调试工具</h3>
-        <button
-          onClick={handleResetData}
-          className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-        >
-          重置数据
-        </button>
-        {resetMessage && (
-          <p className="mt-2 text-sm text-gray-600">{resetMessage}</p>
-        )}
+
+      <div className="pt-4 border-t border-gray-200/60">
+        <h3 className="text-sm font-semibold text-coinbase-semantic-down mb-2 px-1">数据管理</h3>
+        <div className="px-1">
+          <button
+            onClick={handleResetData}
+            className="px-4 py-2 bg-coinbase-semantic-down/10 text-coinbase-semantic-down rounded-coinbase-pill hover:bg-coinbase-semantic-down/20 transition-colors text-sm font-medium"
+          >
+            重置所有数据
+          </button>
+        </div>
       </div>
     </div>
   )

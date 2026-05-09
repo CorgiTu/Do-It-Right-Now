@@ -72,12 +72,12 @@ describe('ListSidebar', () => {
     render(<ListSidebar onListSelect={vi.fn()} />)
 
     const 全部任务 = screen.getByText('全部任务').closest('div')!
-   expect(全部任务).not.toHaveClass('bg-[var(--color-accent-light)]')
+    expect(全部任务).not.toHaveClass('bg-coinbase-primary/10')
 
     fireEvent.click(screen.getByText('工作'))
 
     const 工作 = screen.getByText('工作').closest('div')!
-    expect(工作).toHaveClass('bg-[var(--color-accent-light)]')
+    expect(工作).toHaveClass('bg-coinbase-primary/10')
     expect(工作).toHaveClass('font-medium')
   })
 

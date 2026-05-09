@@ -1,244 +1,170 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useTaskStore } from '../store/taskStore'
 
 interface DueDatePickerProps {
   taskId: string
-  dueDate: string | null
+  dueDate?: string | null
 }
 
 export default function DueDatePicker({ taskId, dueDate }: DueDatePickerProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const [showTimePicker, setShowTimePicker] = useState(false)
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
-  const [hour, setHour] = useState('12')
-  const [minute, setMinute] = useState('00')
-  const [viewYear, setViewYear] = useState(new Date().getFullYear())
-  const [viewMonth, setViewMonth] = useState(new Date().getMonth())
-  const updateTaskContent = useTaskStore(state => state.updateTaskContent)
+  const [viewDate, setViewDate] = useState(new Date())
+  const [hour, setHour] = useState(dueDate ? new Date(dueDate).getHours() : 17)
+  const [minute, setMinute] = useState(dueDate ? new Date(dueDate).getMinutes() : 0)
+  const { updateTaskContent } = useTaskStore()
+  const panelRef = useRef<HTMLDivElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
 
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr)
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    const day = String(date.getDate()).padStart(2, '0')
-    const hours = String(date.getHours()).padStart(2, '0')
-    const minutes = String(date.getMinutes()).padStart(2, '0')
-    return `${month}月${day}日 ${hours}:${minutes}`
-  }
-
-  const isOverdue = (dateStr: string) => {
-    return new Date(dateStr) < new Date(new Date().toDateString())
-  }
-
-  const handleSelectDate = (date: Date) => {
-    setSelectedDate(date)
-    setShowTimePicker(true)
-  }
-
-  const handleConfirmTime = () => {
-    if (selectedDate) {
-      const finalDate = new Date(selectedDate)
-      finalDate.setHours(parseInt(hour), parseInt(minute), 0, 0)
-      updateTaskContent(taskId, { dueDate: finalDate.toISOString() })
-      setIsOpen(false)
-      setShowTimePicker(false)
-      setSelectedDate(null)
+  useEffect(() => {
+    if (dueDate) {
+      const d = new Date(dueDate)
+      setHour(d.getHours())
+      setMinute(d.getMinutes())
     }
+  }, [dueDate])
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (panelRef.current && !panelRef.current.contains(e.target as Node) &&
+          buttonRef.current && !buttonRef.current.contains(e.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const year = viewDate.getFullYear()
+  const month = viewDate.getMonth()
+
+  const firstDay = new Date(year, month, 1).getDay()
+  const daysInMonth = new Date(year, month + 1, 0).getDate()
+
+  const today = new Date()
+  const isToday = (day: number) =>
+    today.getFullYear() === year && today.getMonth() === month && today.getDate() === day
+
+  const handleDateSelect = (day: number) => {
+    const selected = new Date(year, month, day, hour, minute)
+    updateTaskContent(taskId, {
+      dueDate: selected.toISOString(),
+      updatedAt: new Date().toISOString(),
+    })
+    setIsOpen(false)
   }
 
   const handleClear = () => {
-    updateTaskContent(taskId, { dueDate: null })
+    updateTaskContent(taskId, {
+      dueDate: null,
+      updatedAt: new Date().toISOString(),
+    })
     setIsOpen(false)
-    setShowTimePicker(false)
   }
 
-  const handleBackToCalendar = () => {
-    setShowTimePicker(false)
-    setSelectedDate(null)
-  }
+  const prevMonth = () => setViewDate(new Date(year, month - 1, 1))
+  const nextMonth = () => setViewDate(new Date(year, month + 1, 1))
 
-  const prevMonth = () => {
-    if (viewMonth === 0) {
-      setViewMonth(11)
-      setViewYear(viewYear - 1)
-    } else {
-      setViewMonth(viewMonth - 1)
-    }
-  }
-
-  const nextMonth = () => {
-    if (viewMonth === 11) {
-      setViewMonth(0)
-      setViewYear(viewYear + 1)
-    } else {
-      setViewMonth(viewMonth + 1)
-    }
-  }
-
-  const today = new Date()
-  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate()
-  const firstDayOfMonth = new Date(viewYear, viewMonth, 1).getDay()
-
-  const days = Array.from({ length: daysInMonth }, (_, i) => i + 1)
-  const paddingDays = Array.from({ length: firstDayOfMonth }, () => 0)
+  const hours = Array.from({ length: 24 }, (_, i) => i)
+  const minutes = Array.from({ length: 60 }, (_, i) => i)
 
   return (
-    <div className="relative">
+    <div className="relative inline-flex">
       <button
-        type="button"
-        onClick={() => {
-          setIsOpen(!isOpen)
-          if (!isOpen) {
-            setViewYear(today.getFullYear())
-            setViewMonth(today.getMonth())
-            setShowTimePicker(false)
-            setSelectedDate(null)
-          }
-        }}
-        className="flex items-center gap-1 text-xs text-[var(--color-text-light)] hover:text-[var(--color-accent)] transition-colors"
+        ref={buttonRef}
+        onClick={(e) => { e.stopPropagation(); setIsOpen(!isOpen) }}
+        className={`inline-flex items-center gap-1 text-xs transition-colors ${
+          dueDate ? 'text-coinbase-primary' : 'text-coinbase-muted-soft hover:text-coinbase-muted'
+        }`}
       >
-        <span className="text-sm opacity-70">📅</span>
-        {dueDate ? (
-          <span className={isOverdue(dueDate) ? 'text-red-400 font-medium' : 'text-[var(--color-accent)]'}>
-            {formatDate(dueDate)}
-            {isOverdue(dueDate) && ' (已到期)'}
-          </span>
-        ) : (
-          <span className="opacity-60">设置日期</span>
-        )}
+        📅 {dueDate ? new Date(dueDate).toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' }) : '截止'}
       </button>
 
       {isOpen && (
-        <div
-          role="dialog"
-          className="absolute z-10 mt-2 p-4 bg-[var(--color-bg)] rounded-xl shadow-lg border border-[var(--color-border)] w-72 animate-fade-in"
-        >
-          {!showTimePicker ? (
-            <>
-              <div className="flex items-center justify-between mb-4">
-                <button
-                  type="button"
-                  onClick={prevMonth}
-                  className="p-1 rounded-lg hover:bg-[var(--color-hover)] transition-colors text-[var(--color-text-light)]"
-                >
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <polyline points="15 18 9 12 15 6" />
-                  </svg>
-                </button>
-                <h3 className="text-sm font-medium text-[var(--color-text)] tracking-wide">
-                  {viewYear}年{viewMonth + 1}月
-                </h3>
-                <button
-                  type="button"
-                  onClick={nextMonth}
-                  className="p-1 rounded-lg hover:bg-[var(--color-hover)] transition-colors text-[var(--color-text-light)]"
-                >
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <polyline points="9 18 15 12 9 6" />
-                  </svg>
-                </button>
-              </div>
+        <div ref={panelRef} className="absolute top-full left-0 mt-1 z-50 bg-coinbase-surface-card border border-coinbase-hairline rounded-coinbase-lg shadow-coinbase-hover p-3 w-64" onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-center justify-between mb-3">
+            <button onClick={prevMonth} className="p-1 rounded-coinbase-xs hover:bg-coinbase-surface-strong transition-colors text-coinbase-muted">
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6" /></svg>
+            </button>
+            <span className="text-sm font-semibold text-coinbase-ink">
+              {year}年{month + 1}月
+            </span>
+            <button onClick={nextMonth} className="p-1 rounded-coinbase-xs hover:bg-coinbase-surface-strong transition-colors text-coinbase-muted">
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6" /></svg>
+            </button>
+          </div>
 
-              <div className="grid grid-cols-7 gap-1 mb-2">
-                {['日', '一', '二', '三', '四', '五', '六'].map(day => (
-                  <div key={day} className="text-xs text-[var(--color-text-light)] text-center py-1 opacity-70">
-                    {day}
-                  </div>
-                ))}
-              </div>
-
-              <div className="grid grid-cols-7 gap-1">
-                {paddingDays.map((_, index) => (
-                  <div key={`pad-${index}`} className="p-2" />
-                ))}
-                {days.map(day => {
-                  const date = new Date(viewYear, viewMonth, day)
-                  const isPast = date < new Date(new Date().toDateString())
-                  const isToday = date.toDateString() === today.toDateString()
-
-                  return (
-                    <button
-                      key={day}
-                      type="button"
-                      disabled={isPast}
-                      onClick={() => handleSelectDate(date)}
-                      className={`p-2 text-sm rounded-lg transition-all duration-200 ${
-                        isPast
-                          ? 'text-[var(--color-border)] cursor-not-allowed'
-                          : isToday
-                          ? 'bg-[var(--color-accent)] text-white hover:bg-opacity-90'
-                          : 'hover:bg-[var(--color-hover)] text-[var(--color-text)]'
-                      }`}
-                    >
-                      {day}
-                    </button>
-                  )
-                })}
-              </div>
-            </>
-          ) : (
-            <div>
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-sm font-medium text-[var(--color-text)] tracking-wide">
-                  设置时间
-                </h3>
+          <div className="grid grid-cols-7 gap-1 mb-3">
+            {['日', '一', '二', '三', '四', '五', '六'].map(d => (
+              <div key={d} className="text-center text-xs text-coinbase-muted-soft font-medium py-1">{d}</div>
+            ))}
+            {Array.from({ length: firstDay }).map((_, i) => (
+              <div key={`empty-${i}`} />
+            ))}
+            {Array.from({ length: daysInMonth }).map((_, i) => {
+              const day = i + 1
+              const isSelected = dueDate && new Date(dueDate).getDate() === day && new Date(dueDate).getMonth() === month && new Date(dueDate).getFullYear() === year
+              return (
                 <button
-                  type="button"
-                  onClick={handleBackToCalendar}
-                  className="text-xs text-[var(--color-text-light)] hover:text-[var(--color-accent)] transition-colors"
+                  key={day}
+                  onClick={() => handleDateSelect(day)}
+                  className={`text-center text-sm py-1.5 rounded-coinbase-xs transition-colors ${
+                    isSelected
+                      ? 'bg-coinbase-primary text-coinbase-on-primary font-medium'
+                      : 'hover:bg-coinbase-surface-strong text-coinbase-body'
+                  }`}
                 >
-                  返回
+                  {day}
                 </button>
-              </div>
+              )
+            })}
+          </div>
 
-              <div className="flex items-center gap-4 mb-6">
-                <div className="flex-1">
-                  <label className="block text-xs text-[var(--color-text-light)] mb-2">时</label>
-                  <select
-                    value={hour}
-                    onChange={(e) => setHour(e.target.value)}
-                    className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg bg-[var(--color-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-light)]"
-                  >
-                    {Array.from({ length: 24 }, (_, i) => i).map(h => (
-                      <option key={h} value={String(h).padStart(2, '0')}>
-                        {String(h).padStart(2, '0')}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="flex-1">
-                  <label className="block text-xs text-[var(--color-text-light)] mb-2">分</label>
-                  <select
-                    value={minute}
-                    onChange={(e) => setMinute(e.target.value)}
-                    className="w-full px-3 py-2 border border-[var(--color-border)] rounded-lg bg-[var(--color-bg)] text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-light)]"
-                  >
-                    {Array.from({ length: 60 }, (_, i) => i).map(m => (
-                      <option key={m} value={String(m).padStart(2, '0')}>
-                        {String(m).padStart(2, '0')}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
+          <div className="flex items-center gap-2 mb-3">
+            <select
+              value={hour}
+              onChange={(e) => setHour(Number(e.target.value))}
+              className="flex-1 px-2 py-1.5 bg-coinbase-surface-soft border border-coinbase-hairline rounded-coinbase-md text-xs text-coinbase-body"
+            >
+              {hours.map(h => (
+                <option key={h} value={h}>{String(h).padStart(2, '0')}</option>
+              ))}
+            </select>
+            <span className="text-coinbase-muted text-xs">:</span>
+            <select
+              value={minute}
+              onChange={(e) => setMinute(Number(e.target.value))}
+              className="flex-1 px-2 py-1.5 bg-coinbase-surface-soft border border-coinbase-hairline rounded-coinbase-md text-xs text-coinbase-body"
+            >
+              {minutes.map(m => (
+                <option key={m} value={m}>{String(m).padStart(2, '0')}</option>
+              ))}
+            </select>
+          </div>
 
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={handleBackToCalendar}
-                  className="flex-1 px-4 py-2 rounded-lg border border-[var(--color-border)] text-[var(--color-text-light)] hover:bg-[var(--color-hover)] transition-colors"
-                >
-                  返回
-                </button>
-                <button
-                  type="button"
-                  onClick={handleConfirmTime}
-                  className="flex-1 px-4 py-2 rounded-lg bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-hover)] transition-colors"
-                >
-                  确定
-                </button>
-              </div>
-            </div>
-          )}
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                if (dueDate) {
+                  const d = new Date(dueDate)
+                  d.setHours(hour, minute, 0, 0)
+                  updateTaskContent(taskId, {
+                    dueDate: d.toISOString(),
+                    updatedAt: new Date().toISOString(),
+                  })
+                }
+                setIsOpen(false)
+              }}
+              className="flex-1 px-3 py-1.5 bg-coinbase-primary text-coinbase-on-primary rounded-coinbase-pill hover:bg-coinbase-primary-active transition-colors text-xs font-semibold"
+            >
+              确认
+            </button>
+            <button
+              onClick={handleClear}
+              className="flex-1 px-3 py-1.5 bg-coinbase-surface-strong text-coinbase-body rounded-coinbase-pill hover:bg-coinbase-hairline transition-colors text-xs font-medium"
+            >
+              清除
+            </button>
+          </div>
         </div>
       )}
     </div>

@@ -21,7 +21,7 @@ import type { Todo } from './db/types'
 export default function App() {
   const { loadLists, selectList, selectedListId, initDefaultList, initDailyList, lists, reorderLists } = useListStore()
   const { loadTasks, tasks, reorderTasks, moveTaskToList, deleteSelectedTasks, clearSelection, initializeDailyTasks } = useTaskStore()
-  const { currentThemeId } = useThemeStore()
+  const { themeId } = useThemeStore()
   const { loadTags, loadTaskTags, tags } = useTagStore()
   const [showSettings, setShowSettings] = useState(false)
   const [showAddTaskModal, setShowAddTaskModal] = useState(false)
@@ -211,22 +211,22 @@ export default function App() {
         },
       }}
     >
-      <div className="flex flex-col h-screen bg-[var(--color-bg)]">
+      <div className="flex flex-col h-screen bg-coinbase-canvas">
         <TitleBar />
         <div className="flex-1 flex overflow-hidden">
           <ListSidebar
             onListSelect={handleListSelect}
           />
           <div className="flex-1 flex flex-col overflow-hidden">
-            <header className="bg-[var(--color-bg)] border-b border-[var(--color-border)] px-8 py-6 shadow-sm flex items-center justify-between">
-              <h1 className="text-2xl font-semibold text-[var(--color-text)] tracking-wide">
+            <header className="bg-coinbase-canvas border-b border-gray-200/60 px-8 py-6 flex items-center justify-between">
+              <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
                 {selectedListId === 'all'
                   ? '全部任务'
                   : useListStore.getState().lists.find(l => l.id === selectedListId)?.name || '任务'}
               </h1>
               <button
                 onClick={() => setShowSettings(!showSettings)}
-                className="p-2 rounded-lg hover:bg-[var(--color-hover)] transition-colors text-[var(--color-text-light)] hover:text-[var(--color-text)]"
+                className="p-2 rounded-coinbase-sm hover:bg-coinbase-surface-strong transition-colors text-coinbase-muted hover:text-coinbase-body"
                 title="设置"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -235,9 +235,9 @@ export default function App() {
                 </svg>
               </button>
             </header>
-            <main className="flex-1 overflow-y-auto px-8 py-6">
+            <main className="flex-1 overflow-y-auto px-8 py-6 bg-coinbase-surface-soft">
               <div className="max-w-3xl mx-auto w-full">
-                <div className="mt-6 animate-slide-up">
+                <div className="animate-slide-up">
                   {selectedListId === 'all' ? (
                     <TaskListAllView />
                   ) : (
@@ -249,13 +249,13 @@ export default function App() {
           </div>
         </div>
         {showSettings && (
-          <div className="fixed inset-0 bg-black bg-opacity-30 z-50 flex items-center justify-center" onClick={() => setShowSettings(false)}>
-            <div className="bg-[var(--color-bg)] rounded-xl shadow-2xl border border-[var(--color-border)] max-w-md w-full mx-4 animate-fade-in" onClick={(e) => e.stopPropagation()}>
-              <div className="flex items-center justify-between p-6 border-b border-[var(--color-border)]">
-                <h2 className="text-xl font-semibold text-[var(--color-text)]">设置</h2>
+          <div className="fixed inset-0 bg-black/30 z-50 flex items-center justify-center" onClick={() => setShowSettings(false)}>
+            <div className="bg-coinbase-canvas rounded-coinbase-xl shadow-coinbase-hover border border-gray-200/60 max-w-md w-full mx-4 animate-fade-in" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between p-6 border-b border-gray-200/60">
+                <h2 className="text-xl font-semibold text-coinbase-ink">设置</h2>
                 <button
                   onClick={() => setShowSettings(false)}
-                  className="p-1 rounded-lg hover:bg-[var(--color-hover)] transition-colors text-[var(--color-text-light)]"
+                  className="p-1 rounded-coinbase-sm hover:bg-coinbase-surface-strong transition-colors text-coinbase-muted"
                 >
                   ✕
                 </button>
@@ -308,21 +308,21 @@ export default function App() {
                     maxWidth: '800px',
                   }}
                 >
-                  <div className="bg-white rounded-lg shadow-sm border border-[var(--color-border)] p-4">
+                  <div className="bg-coinbase-surface-card rounded-coinbase-lg shadow-coinbase-hover border border-gray-200/60 p-4">
                     <div className="flex items-start gap-3">
                       <div className="flex-shrink-0">
                         <input
                           type="checkbox"
                           checked={task.completed}
                           readOnly
-                          className="w-5 h-5 rounded border-[var(--color-accent-light)] text-[var(--color-accent)] focus:ring-[var(--color-accent-light)] focus:ring-offset-0"
+                          className="w-5 h-5 rounded-coinbase-xs border-coinbase-hairline text-coinbase-primary focus:ring-coinbase-primary/20"
                         />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <span className={`block text-base ${task.completed ? 'line-through text-[var(--color-text-light)]' : 'text-[var(--color-text)]'}`}>
+                        <span className={`block text-base ${task.completed ? 'line-through text-coinbase-muted' : 'text-coinbase-body'}`}>
                           {task.content}
                         </span>
-                        <div className="mt-2 flex items-center gap-2 text-xs text-[var(--color-text-light)]">
+                        <div className="mt-2 flex items-center gap-2 text-xs text-coinbase-muted">
                           <span>{new Date(task.createdAt).toLocaleString('zh-CN')}</span>
                           {task.dueDate && (
                             <span className="flex items-center gap-1">
@@ -330,7 +330,7 @@ export default function App() {
                             </span>
                           )}
                           {task.isRecurring && (
-                            <span className="text-green-600 bg-green-50 px-2 py-0.5 rounded-full border border-green-200">
+                            <span className="text-coinbase-semantic-up bg-coinbase-semantic-up/10 px-2 py-0.5 rounded-coinbase-pill border border-coinbase-semantic-up/20">
                               🔄 每日
                             </span>
                           )}
@@ -354,11 +354,11 @@ export default function App() {
                     maxWidth: '400px',
                   }}
                 >
-                  <div className="bg-[var(--color-bg)] rounded-lg shadow-sm border border-[var(--color-border)] px-4 py-3">
+                  <div className="bg-coinbase-surface-card rounded-coinbase-lg shadow-coinbase-hover border border-coinbase-hairline px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: list.color }} />
-                      <span className="text-sm text-[var(--color-text)]">{list.name}</span>
-                      <span className="text-xs text-[var(--color-text-light)]">{taskCount}</span>
+                      <div className="w-3.5 h-3.5 rounded-coinbase-full" style={{ backgroundColor: list.color }} />
+                      <span className="text-sm text-coinbase-body-strong">{list.name}</span>
+                      <span className="text-xs text-coinbase-muted">{taskCount}</span>
                     </div>
                   </div>
                 </div>

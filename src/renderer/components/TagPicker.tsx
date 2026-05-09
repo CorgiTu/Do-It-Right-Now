@@ -187,7 +187,7 @@ export default function TagPicker({ taskId, currentTagIds, onChange, initialOpen
           type="button"
           onClick={handleToggle}
           onMouseDown={(e) => e.preventDefault()}
-          className="flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors text-[var(--color-text-light)] hover:text-[var(--color-accent)]"
+          className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-coinbase-pill transition-colors text-coinbase-muted bg-coinbase-surface-soft hover:bg-coinbase-surface-strong hover:text-coinbase-body"
         >
           <span className="text-sm">🏷️</span>
           <span>
@@ -200,7 +200,7 @@ export default function TagPicker({ taskId, currentTagIds, onChange, initialOpen
         createPortal(
           <div
             data-tagpicker
-            className="fixed z-[999] w-72 bg-white rounded-lg shadow-xl border border-[var(--color-border)] p-3"
+            className="fixed z-[999] w-72 bg-coinbase-surface-card rounded-coinbase-lg shadow-coinbase-hover border border-coinbase-hairline p-3 animate-fade-in"
             style={{ top: position.top, left: position.left }}
           >
             <div className="mb-3">
@@ -212,7 +212,7 @@ export default function TagPicker({ taskId, currentTagIds, onChange, initialOpen
                   onChange={(e) => setSearchValue(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="搜索或创建标签"
-                  className="flex-1 px-2 py-1 text-sm border border-[var(--color-border)] rounded focus:outline-none focus:border-[var(--color-accent)]"
+                  className="flex-1 px-3 py-1.5 text-sm bg-coinbase-surface-soft border border-coinbase-hairline rounded-coinbase-md text-coinbase-body placeholder-coinbase-muted-soft focus:outline-none focus:border-coinbase-primary focus:ring-1 focus:ring-coinbase-primary/20"
                 />
               </div>
 
@@ -223,20 +223,20 @@ export default function TagPicker({ taskId, currentTagIds, onChange, initialOpen
                       <button
                         type="button"
                         onClick={() => setShowColorPicker(true)}
-                        className="w-full text-left text-xs text-[var(--color-accent)] hover:underline"
+                        className="w-full text-left text-xs text-coinbase-primary hover:underline px-1 py-1"
                       >
                         + 创建标签 "{searchValue}"
                       </button>
                     ) : (
-                      <div className="space-y-2">
+                      <div className="space-y-2 bg-coinbase-surface-soft rounded-coinbase-md p-2">
                         <div className="flex flex-wrap gap-1">
                           {TAG_COLORS.map((color) => (
                             <button
                               key={color}
                               type="button"
                               onClick={() => setSelectedColor(color)}
-                              className={`w-5 h-5 rounded-full border-2 transition-transform ${
-                                selectedColor === color ? 'border-[var(--color-text)] scale-110' : 'border-transparent'
+                              className={`w-5 h-5 rounded-coinbase-full border-2 transition-transform ${
+                                selectedColor === color ? 'border-coinbase-primary scale-110' : 'border-transparent'
                               }`}
                               style={{ backgroundColor: color }}
                             />
@@ -246,14 +246,14 @@ export default function TagPicker({ taskId, currentTagIds, onChange, initialOpen
                           <button
                             type="button"
                             onClick={handleCreateTag}
-                            className="px-2 py-1 text-xs bg-[var(--color-accent)] text-white rounded hover:opacity-90"
+                            className="px-3 py-1.5 text-xs bg-coinbase-primary text-coinbase-on-primary rounded-coinbase-pill hover:bg-coinbase-primary-active transition-colors font-semibold"
                           >
                             确认创建
                           </button>
                           <button
                             type="button"
                             onClick={() => setShowColorPicker(false)}
-                            className="px-2 py-1 text-xs text-[var(--color-text-light)] hover:underline"
+                            className="px-3 py-1.5 text-xs text-coinbase-muted bg-coinbase-surface-strong rounded-coinbase-pill hover:bg-coinbase-hairline transition-colors"
                           >
                             取消
                           </button>
@@ -265,16 +265,16 @@ export default function TagPicker({ taskId, currentTagIds, onChange, initialOpen
             </div>
 
             {tags.length === 0 ? (
-              <div className="text-center py-4 text-sm text-[var(--color-text-light)]">
+              <div className="text-center py-4 text-sm text-coinbase-muted">
                 <p className="mb-2">暂无标签</p>
                 <p className="text-xs opacity-70">在上方输入标签名称并按回车创建</p>
               </div>
             ) : (
-              <div className="border-t border-[var(--color-border)] pt-2">
-                <p className="text-xs text-[var(--color-text-light)] mb-2">选择标签：</p>
-                <div className="max-h-40 overflow-y-auto space-y-1">
+              <div className="border-t border-coinbase-hairline pt-2">
+                <p className="text-xs text-coinbase-muted-soft mb-2 px-1">选择标签：</p>
+                <div className="max-h-40 overflow-y-auto space-y-0.5">
                   {filteredTags.length === 0 && searchValue ? (
-                    <p className="text-xs text-[var(--color-text-light)] text-center py-2">
+                    <p className="text-xs text-coinbase-muted text-center py-2">
                       没有找到匹配的标签
                     </p>
                   ) : (
@@ -286,21 +286,21 @@ export default function TagPicker({ taskId, currentTagIds, onChange, initialOpen
                           type="button"
                           onClick={() => handleTagClick(tag.id)}
                           onMouseDown={(e) => e.preventDefault()}
-                          className={`w-full text-left px-2 py-1 rounded text-sm flex items-center gap-2 transition-colors ${
+                          className={`w-full text-left px-3 py-2 rounded-coinbase-sm text-sm flex items-center gap-2 transition-colors ${
                             isSelected
-                              ? 'bg-[var(--color-accent-light)] bg-opacity-40'
-                              : 'hover:bg-[var(--color-hover)]'
+                              ? 'bg-coinbase-primary/10 text-coinbase-ink'
+                              : 'hover:bg-coinbase-surface-strong text-coinbase-body'
                           }`}
                         >
                           <span
-                            className="w-3 h-3 rounded-full flex-shrink-0"
+                            className="w-3 h-3 rounded-coinbase-full flex-shrink-0"
                             style={{ backgroundColor: tag.color }}
                           />
                           <span className="flex-1 truncate">{tag.name}</span>
-                          <span className="text-xs text-[var(--color-text-light)] opacity-60">
+                          <span className="text-xs text-coinbase-muted-soft">
                             {tag.usageCount}
                           </span>
-                          {isSelected && <span className="text-[var(--color-accent)]">✓</span>}
+                          {isSelected && <span className="text-coinbase-primary font-semibold">✓</span>}
                         </button>
                       )
                     })
@@ -310,7 +310,7 @@ export default function TagPicker({ taskId, currentTagIds, onChange, initialOpen
             )}
 
             {isAtLimit && (
-              <p className="text-xs text-red-500 mt-2 text-center">标签数量已达上限（10 个）</p>
+              <p className="text-xs text-coinbase-semantic-down mt-2 text-center">标签数量已达上限（10 个）</p>
             )}
           </div>,
           document.body
@@ -321,7 +321,7 @@ export default function TagPicker({ taskId, currentTagIds, onChange, initialOpen
           {currentTags.map((tag) => (
             <span
               key={tag.id}
-              className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs text-white"
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-coinbase-xs text-xs text-coinbase-on-primary"
               style={{ backgroundColor: tag.color }}
               title={tag.name}
             >
@@ -329,7 +329,7 @@ export default function TagPicker({ taskId, currentTagIds, onChange, initialOpen
               <button
                 type="button"
                 onClick={() => handleRemoveTag(tag.id)}
-                className="ml-0.5 hover:opacity-70"
+                className="ml-0.5 hover:opacity-70 transition-opacity"
                 title="移除标签"
               >
                 ×

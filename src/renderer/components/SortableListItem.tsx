@@ -13,23 +13,12 @@ interface SortableListItemProps {
   taskCount: number
 }
 
-/**
- * SortableListItem - 分组项拖拽组件
- * 
- * 关键动画优化点：
- * 1. 使用 dnd-kit 的 useSortable hook 处理拖拽逻辑
- * 2. 被拖拽项通过 visibility: hidden 保持占位，维持侧边栏布局
- * 3. 让位动画由 dnd-kit 自动计算 transform，配合 CSS transition 实现平滑过渡
- * 4. 拖拽浮层由 DragOverlay 在 App.tsx 中统一渲染，脱离文档流
- * 5. 所有位移动画仅使用 transform，启用 GPU 加速
- */
 export default function SortableListItem({ list, isSelected, onSelect, taskCount }: SortableListItemProps) {
   const { removeList, updateList } = useListStore()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showColorPicker, setShowColorPicker] = useState(false)
   const colorButtonRef = useRef<HTMLButtonElement>(null)
-  
-  // 拖拽配置：与任务项一致的动画参数
+
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: `list-${list.id}`,
     transition: {
@@ -37,14 +26,12 @@ export default function SortableListItem({ list, isSelected, onSelect, taskCount
       easing: 'ease-out',
     },
     resizeObserverConfig: {
-      disabled: true, // 禁用避免抖动
+      disabled: true,
     },
   })
 
-  // 让位动画的 transform 样式
   const style = {
     transform: CSS.Transform.toString(transform),
-    // transition 始终应用，dnd-kit 自动处理拖拽项的过渡
     transition: transition || 'transform 180ms ease-out',
   }
 
@@ -75,12 +62,7 @@ export default function SortableListItem({ list, isSelected, onSelect, taskCount
         style={style}
         className="sortable-list-item group"
       >
-        {/* 
-         * 占位条实现：
-         * - isDragging 时隐藏内容，但保持元素尺寸
-         * - pointerEvents: none 防止隐藏元素响应鼠标
-         */}
-        <div style={isDragging ? { 
+        <div style={isDragging ? {
           visibility: 'hidden',
           pointerEvents: 'none',
         } : {}}>
@@ -88,9 +70,9 @@ export default function SortableListItem({ list, isSelected, onSelect, taskCount
             <div
               {...listeners}
               {...attributes}
-              className="drag-handle p-1 rounded hover:bg-[var(--color-hover)]"
+              className="drag-handle p-1 rounded-coinbase-xs hover:bg-coinbase-surface-strong"
             >
-              <svg className="w-4 h-4 text-[var(--color-text-light)]" viewBox="0 0 24 24" fill="currentColor">
+              <svg className="w-4 h-4 text-coinbase-muted-soft" viewBox="0 0 24 24" fill="currentColor">
                 <circle cx="9" cy="6" r="1.5" />
                 <circle cx="15" cy="6" r="1.5" />
                 <circle cx="9" cy="12" r="1.5" />
@@ -102,10 +84,10 @@ export default function SortableListItem({ list, isSelected, onSelect, taskCount
             <button
               onClick={onSelect}
               onContextMenu={handleContextMenu}
-              className={`flex-1 flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left ${
+              className={`flex-1 flex items-center gap-3 px-3 py-2.5 rounded-coinbase-sm transition-all text-left ${
                 isSelected
-                  ? 'bg-[var(--color-accent-light)] bg-opacity-60 text-[var(--color-text)]'
-                  : 'hover:bg-[var(--color-hover)] text-[var(--color-text-light)] hover:text-[var(--color-text)]'
+                  ? 'bg-coinbase-primary/10 text-coinbase-ink font-medium'
+                  : 'hover:bg-coinbase-surface-strong text-coinbase-muted hover:text-coinbase-body'
               }`}
             >
               <button
@@ -114,12 +96,12 @@ export default function SortableListItem({ list, isSelected, onSelect, taskCount
                   e.stopPropagation()
                   setShowColorPicker(!showColorPicker)
                 }}
-                className="w-3.5 h-3.5 rounded-full flex-shrink-0 hover:ring-2 hover:ring-[var(--color-accent)] hover:ring-offset-1 transition-all cursor-pointer"
+                className="w-3 h-3 rounded-coinbase-full flex-shrink-0 hover:ring-2 hover:ring-gray-900/30 hover:ring-offset-1 transition-all cursor-pointer"
                 style={{ backgroundColor: list.color }}
                 title="修改颜色"
               />
               <span className="text-sm truncate flex-1">{list.name}</span>
-              <span className="text-xs opacity-70">{taskCount}</span>
+              <span className="text-xs text-gray-400">{taskCount}</span>
             </button>
           </div>
         </div>

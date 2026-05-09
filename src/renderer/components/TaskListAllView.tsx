@@ -7,11 +7,6 @@ import { CSS } from '@dnd-kit/utilities'
 import TaskItem from './TaskItem'
 import type { Todo } from '../db/types'
 
-/**
- * SortableTaskItemAllView - 全部任务视图中的任务项拖拽组件
- * 
- * 动画优化与 TaskList.tsx 中的 SortableTaskItem 保持一致
- */
 function SortableTaskItemAllView({ task }: { task: Todo }) {
   const {
     attributes,
@@ -20,7 +15,7 @@ function SortableTaskItemAllView({ task }: { task: Todo }) {
     transform,
     transition,
     isDragging,
-  } = useSortable({ 
+  } = useSortable({
     id: task.id,
     transition: {
       duration: 180,
@@ -40,13 +35,12 @@ function SortableTaskItemAllView({ task }: { task: Todo }) {
   }
 
   return (
-    <div 
-      ref={setNodeRef} 
+    <div
+      ref={setNodeRef}
       style={style}
       className="sortable-item"
     >
-      {/* 占位条：拖拽时保持尺寸 */}
-      <div style={isDragging ? { 
+      <div style={isDragging ? {
         visibility: 'hidden',
         pointerEvents: 'none',
       } : {}}>
@@ -78,14 +72,14 @@ export default function TaskListAllView() {
       })
     : tasks
 
-  const listsWithTasks = lists.filter(list => 
+  const listsWithTasks = lists.filter(list =>
     filteredTasks.some(task => task.listId === list.id)
   )
 
   if (filteredTasks.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-64 text-[var(--color-text-light)]">
-        <div className="text-6xl mb-4 opacity-30">✓</div>
+      <div className="flex flex-col items-center justify-center h-64 text-coinbase-muted">
+        <div className="text-6xl mb-4 opacity-20">✓</div>
         <p className="text-base font-light tracking-wide">
           {selectedTagIds.length > 0 ? '没有匹配的任务' : '暂无任务'}
         </p>
@@ -107,16 +101,16 @@ export default function TaskListAllView() {
           <section key={list.id} className="animate-fade-in">
             <div className="flex items-center gap-2 mb-4">
               <span
-                className="w-3 h-3 rounded-full shadow-sm"
+                className="w-3 h-3 rounded-coinbase-full shadow-sm"
                 style={{ backgroundColor: list.color }}
               />
-              <h2 className="text-lg font-semibold text-[var(--color-text)] tracking-wide">{list.name}</h2>
-              <span className="text-sm text-[var(--color-text-light)] opacity-70">({listTasks.length})</span>
+              <h2 className="text-lg font-semibold text-coinbase-ink">{list.name}</h2>
+              <span className="text-sm text-coinbase-muted-soft">({listTasks.length})</span>
             </div>
 
             <div className="flex flex-col gap-4 ml-5">
               {incompleteTasks.length > 0 && (
-                <ul role="list" className="space-y-3">
+                <ul role="list" className="space-y-2">
                   {incompleteTasks.map(task => (
                     <li key={task.id}>
                       <SortableTaskItemAllView task={task} />
@@ -126,8 +120,8 @@ export default function TaskListAllView() {
               )}
 
               {completedTasks.length > 0 && (
-                <div className="pt-6 border-t border-[var(--color-border)]">
-                  <h3 className="text-sm text-[var(--color-text-light)] mb-3 font-medium tracking-wide">已完成 ({completedTasks.length})</h3>
+                <div className="pt-6 border-t border-gray-200/60">
+                  <h3 className="text-sm text-gray-400 mb-3 font-medium tracking-wide">已完成 ({completedTasks.length})</h3>
                   <ul role="list" className="space-y-2">
                   {completedTasks.map(task => (
                     <li key={task.id}>

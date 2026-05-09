@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useTaskStore } from '../store/taskStore'
+import TagPicker from './TagPicker'
+import { useTagStore } from '../store/tagStore'
 
 interface AddTaskModalProps {
   isOpen: boolean
@@ -9,103 +11,89 @@ interface AddTaskModalProps {
 
 export default function AddTaskModal({ isOpen, onClose, listId }: AddTaskModalProps) {
   const [content, setContent] = useState('')
-  const [isDailyList, setIsDailyList] = useState(false)
-  const { addTask } = useTaskStore()
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([])
   const inputRef = useRef<HTMLInputElement>(null)
+  const { addTask } = useTaskStore()
+  const tags = useTagStore((state) => state.tags)
+  const taskTagMap = useTagStore((state) => state.taskTagMap)
 
   useEffect(() => {
-    const checkDailyList = async () => {
-      if (listId) {
-        const savedDailyListId = localStorage.getItem('do-it-right-now-daily-list-id')
-        const isDaily = savedDailyListId === listId
-        setIsDailyList(isDaily)
-      } else {
-        setIsDailyList(false)
-      }
-    }
-    checkDailyList()
-  }, [listId, isOpen])
-
-  useEffect(() => {
-    if (isOpen && inputRef.current) {
-      inputRef.current.focus()
+    if (isOpen) {
+      setContent('')
+      setSelectedTagIds([])
+      setTimeout(() => inputRef.current?.focus(), 100)
     }
   }, [isOpen])
 
-  const handleAdd = async () => {
-    const trimmed = content.trim()
-    if (trimmed) {
-      await addTask(trimmed, listId, isDailyList)
-      setContent('')
-      onClose()
-    }
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleAdd()
-    } else if (e.key === 'Escape') {
-      onClose()
-    }
-  }
-
-  const handleOverlayClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      onClose()
-    }
-  }
-
   if (!isOpen) return null
 
+  const handleSubmit = async () => {
+    const trimmed = content.trim()
+    if (!trimmed) return
+
+    await addTask(trimmed, listId)
+    onClose()
+  }
+
   return (
-    <div
-      className="fixed inset-0 bg-black bg-opacity-30 z-50 flex items-center justify-center animate-fade-in"
-      onClick={handleOverlayClick}
-    >
+    <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" />
       <div
-        className="bg-[var(--color-bg)] rounded-xl shadow-2xl border border-[var(--color-border)] max-w-md w-full mx-4 animate-slide-up"
+        className="relative bg-coinbase-surface-card rounded-coinbase-xl shadow-coinbase-hover border border-coinbase-hairline p-5 max-w-lg w-full mx-4 animate-slide-up"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between p-6 border-b border-[var(--color-border)]">
-          <h2 className="text-xl font-semibold text-[var(--color-text)]">
-            {isDailyList ? '添加每日任务' : '添加任务'}
-          </h2>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-base font-semibold text-coinbase-ink">添加任务</h3>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg hover:bg-[var(--color-hover)] transition-colors text-[var(--color-text-light)]"
+            className="p-1 rounded-coinbase-sm hover:bg-coinbase-surface-strong transition-colors text-coinbase-muted"
           >
-            ✕
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
           </button>
         </div>
-        <div className="p-6">
-          {isDailyList && (
-            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">
-              💡 此分组中的任务将自动设置为每日重复，每天自动重置完成状态。
-            </div>
-          )}
+
+        <div className="mb-4">
           <input
             ref={inputRef}
             type="text"
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={isDailyList ? '输入每日任务内容...' : '输入任务内容...'}
-            className="w-full px-4 py-3 bg-[var(--color-bg)] border border-[var(--color-accent-light)] rounded-lg text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent-light)]"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleSubmit()
+              if (e.key === 'Escape') onClose()
+            }}
+            placeholder="输入任务内容..."
+            className="w-full px-4 py-3 bg-coinbase-surface-soft border border-coinbase-hairline rounded-coinbase-md text-coinbase-body placeholder-coinbase-muted-soft focus:outline-none focus:ring-2 focus:ring-coinbase-primary/20 focus:border-coinbase-primary transition-all"
+            maxLength={200}
           />
-          <div className="mt-4 flex justify-end gap-3">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 rounded-lg border border-[var(--color-border)] text-[var(--color-text-light)] hover:bg-[var(--color-hover)] transition-colors"
-            >
-              取消
-            </button>
-            <button
-              onClick={handleAdd}
-              className="px-4 py-2 rounded-lg bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-hover)] transition-colors"
-            >
-              添加
-            </button>
-          </div>
+        </div>
+
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-coinbase-body-strong mb-2">标签</label>
+          <TagPicker
+            taskId=""
+            currentTagIds={selectedTagIds}
+            onChange={setSelectedTagIds}
+          />
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            onClick={handleSubmit}
+            disabled={!content.trim()}
+            className="flex-1 px-4 py-2.5 bg-coinbase-primary-btn text-white rounded-coinbase-pill hover:bg-coinbase-primary-btn-hover transition-colors text-sm font-semibold disabled:opacity-40"
+          >
+            添加
+          </button>
+          <button
+            onClick={onClose}
+            className="flex-1 px-4 py-2.5 border border-coinbase-hairline text-coinbase-body rounded-coinbase-pill hover:bg-coinbase-surface-strong transition-colors text-sm font-medium"
+          >
+            取消
+          </button>
         </div>
       </div>
     </div>

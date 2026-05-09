@@ -1,88 +1,83 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useTaskStore } from '../store/taskStore'
 
 interface ReminderPickerProps {
   taskId: string
-  reminder: string | null
-  dueDate: string | null
+  reminder?: number | null
+  dueDate?: string | null
 }
-
-const REMINDER_OPTIONS = [
-  { label: '到期时', value: '0min', offset: 0 },
-  { label: '提前15分钟', value: '15min', offset: 15 * 60 * 1000 },
-  { label: '提前1小时', value: '1h', offset: 60 * 60 * 1000 },
-  { label: '提前1天', value: '1d', offset: 24 * 60 * 60 * 1000 },
-]
 
 export default function ReminderPicker({ taskId, reminder, dueDate }: ReminderPickerProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const updateTaskContent = useTaskStore(state => state.updateTaskContent)
+  const { updateTaskContent } = useTaskStore()
+  const panelRef = useRef<HTMLDivElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
 
-  if (!dueDate) {
-    return (
-      <button
-        type="button"
-        disabled
-        className="flex items-center gap-1 text-xs text-[var(--color-border)] cursor-not-allowed"
-        title="请先设置截止日期"
-      >
-        <span className="text-sm opacity-70">🔔</span>
-        <span className="opacity-60">设置提醒</span>
-      </button>
-    )
-  }
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (panelRef.current && !panelRef.current.contains(e.target as Node) &&
+          buttonRef.current && !buttonRef.current.contains(e.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
-  const selectedOption = REMINDER_OPTIONS.find(opt => opt.value === reminder)
+  const reminders = [
+    { label: '准时', value: 0 },
+    { label: '提前 15 分钟', value: 15 },
+    { label: '提前 1 小时', value: 60 },
+    { label: '提前 1 天', value: 1440 },
+  ]
 
-  const handleSelect = (value: string | null) => {
-    updateTaskContent(taskId, { reminder: value })
+  const handleSelect = (value: number | null) => {
+    updateTaskContent(taskId, {
+      reminder: value,
+      updatedAt: new Date().toISOString(),
+    })
     setIsOpen(false)
   }
 
+  const reminderLabel = reminder !== null && reminder !== undefined
+    ? reminders.find(r => r.value === reminder)?.label || `${reminder} 分钟`
+    : null
+
   return (
-    <div className="relative">
+    <div className="relative inline-flex">
       <button
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1 text-xs text-[var(--color-text-light)] hover:text-[var(--color-accent)] transition-colors"
+        ref={buttonRef}
+        onClick={(e) => { e.stopPropagation(); setIsOpen(!isOpen) }}
+        className={`inline-flex items-center gap-1 text-xs transition-colors ${
+          reminderLabel ? 'text-coinbase-primary' : 'text-coinbase-muted-soft hover:text-coinbase-muted'
+        }`}
       >
-        <span className="text-sm opacity-70">🔔</span>
-        {selectedOption ? (
-          <span className="text-[var(--color-accent)]">{selectedOption.label}</span>
-        ) : (
-          <span className="opacity-60">设置提醒</span>
-        )}
+        🔔 {reminderLabel || '提醒'}
       </button>
 
       {isOpen && (
-        <div
-          role="listbox"
-          className="absolute z-10 mt-2 py-2 bg-white rounded-xl shadow-lg border border-[var(--color-border)] w-48 animate-fade-in"
-        >
-          {REMINDER_OPTIONS.map(option => (
+        <div ref={panelRef} className="absolute top-full left-0 mt-1 z-50 bg-coinbase-surface-card border border-coinbase-hairline rounded-coinbase-lg shadow-coinbase-hover p-1.5 w-44" onClick={(e) => e.stopPropagation()}>
+          {reminders.map(r => (
             <button
-              key={option.value}
-              type="button"
-              role="option"
-              aria-selected={reminder === option.value}
-              onClick={() => handleSelect(option.value)}
-              className={`w-full px-4 py-2 text-sm text-left transition-colors duration-200 ${
-                reminder === option.value
-                  ? 'bg-[var(--color-hover)] text-[var(--color-text)] font-medium'
-                  : 'text-[var(--color-text-light)] hover:bg-[var(--color-hover)]'
+              key={r.value}
+              onClick={() => handleSelect(r.value)}
+              className={`w-full text-left px-3 py-2 rounded-coinbase-sm text-sm transition-colors ${
+                reminder === r.value
+                  ? 'bg-coinbase-primary/10 text-coinbase-primary font-medium'
+                  : 'text-coinbase-body hover:bg-coinbase-surface-strong'
               }`}
             >
-              {option.label}
+              {r.label}
             </button>
           ))}
-          <hr className="my-1 border-[var(--color-border)]" />
-          <button
-            type="button"
-            onClick={() => handleSelect(null)}
-            className="w-full px-4 py-2 text-sm text-left text-red-400 hover:bg-red-50 transition-colors"
-          >
-            清除提醒
-          </button>
+          {reminder !== null && reminder !== undefined && (
+            <button
+              onClick={() => handleSelect(null)}
+              className="w-full text-left px-3 py-2 rounded-coinbase-sm text-sm text-coinbase-semantic-down hover:bg-coinbase-surface-strong transition-colors"
+            >
+              清除提醒
+            </button>
+          )}
         </div>
       )}
     </div>

@@ -1,66 +1,45 @@
 import { create } from 'zustand'
-import { themes, DEFAULT_THEME_ID, getThemeById } from '../config/themes'
-import type { ThemeColors } from '../types/theme'
+import { themes, DEFAULT_THEME_ID } from '../config/themes'
+import type { ThemeId } from '../types/theme'
 
-const THEME_STORAGE_KEY = 'do-it-right-now-theme'
-
-interface ThemeStore {
-  currentThemeId: string
-  switchTheme: (themeId: string) => void
-  getCurrentTheme: () => ThemeColors | undefined
+interface ThemeState {
+  themeId: ThemeId
+  setTheme: (id: ThemeId) => void
+  applyTheme: () => void
 }
 
-function applyThemeToCSS(theme: ThemeColors): void {
-  const root = document.documentElement
-  root.style.setProperty('--color-bg', theme.bg)
-  root.style.setProperty('--color-bg-alt', theme.bgAlt)
-  root.style.setProperty('--color-text', theme.text)
-  root.style.setProperty('--color-text-light', theme.textLight)
-  root.style.setProperty('--color-border', theme.border)
-  root.style.setProperty('--color-shadow', theme.shadow)
-  root.style.setProperty('--color-hover', theme.hover)
-  root.style.setProperty('--color-accent', theme.accent)
-  root.style.setProperty('--color-accent-hover', theme.accentHover)
-  root.style.setProperty('--color-accent-light', theme.accentLight)
+function getTheme(id: ThemeId) {
+  return themes.find(t => t.id === id) || themes[0]
 }
 
-function getInitialThemeId(): string {
+function getStoredTheme(): ThemeId {
   try {
-    const saved = localStorage.getItem(THEME_STORAGE_KEY)
-    if (saved && getThemeById(saved)) {
-      return saved
+    const stored = localStorage.getItem('theme')
+    if (stored === 'coinbase-light' || stored === 'coinbase-dark') {
+      return stored
     }
-  } catch (e) {
-    // localStorage not available
-  }
-  return DEFAULT_THEME_ID
+  } catch { }
+  return DEFAULT_THEME_ID as ThemeId
 }
 
-const initialThemeId = getInitialThemeId()
-const initialTheme = getThemeById(initialThemeId)
-if (initialTheme) {
-  applyThemeToCSS(initialTheme)
+export function applyThemeColors(themeId: ThemeId) {
+  const theme = getTheme(themeId)
+  const root = document.documentElement
+  Object.entries(theme.colors).forEach(([key, value]) => {
+    root.style.setProperty(`--color-${key}`, value)
+  })
+  localStorage.setItem('theme', themeId)
 }
 
-export const useThemeStore = create<ThemeStore>((set, get) => ({
-  currentThemeId: initialThemeId,
-
-  switchTheme: (themeId: string) => {
-    const theme = getThemeById(themeId)
-    if (!theme) return
-
-    try {
-      localStorage.setItem(THEME_STORAGE_KEY, themeId)
-    } catch (e) {
-      // localStorage not available
-    }
-
-    applyThemeToCSS(theme)
-    set({ currentThemeId: themeId })
+export const useThemeStore = create<ThemeState>((set) => ({
+  themeId: getStoredTheme(),
+  setTheme: (id: ThemeId) => {
+    set({ themeId: id })
+    applyThemeColors(id)
   },
-
-  getCurrentTheme: () => {
-    const { currentThemeId } = get()
-    return getThemeById(currentThemeId)
+  applyTheme: () => {
+    const storedId = getStoredTheme()
+    applyThemeColors(storedId)
+    set({ themeId: storedId })
   },
 }))

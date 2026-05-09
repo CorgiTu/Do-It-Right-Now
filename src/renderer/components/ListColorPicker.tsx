@@ -1,44 +1,41 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
-import { createPortal } from 'react-dom'
+import { useEffect, useRef, useState } from 'react'
 
 interface ListColorPickerProps {
   currentColor: string
   onColorSelect: (color: string) => void
   onClose: () => void
-  anchorRef: React.RefObject<HTMLElement | null>
+  anchorRef: React.RefObject<HTMLButtonElement>
 }
 
-const presetColors = [
-  '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6',
-  '#EC4899', '#6366F1', '#14B8A6', '#F97316', '#06B6D4',
-  '#84CC16', '#D946EF',
+const COLORS = [
+  '#0052FF', '#003ECC', '#05B169', '#F4B000',
+  '#CF202F', '#8B5CF6', '#EC4899', '#06B6D4',
+  '#F97316', '#0EA5E9', '#14B8A6', '#6366F1',
 ]
 
 export default function ListColorPicker({ currentColor, onColorSelect, onClose, anchorRef }: ListColorPickerProps) {
-  const [showCustom, setShowCustom] = useState(false)
-  const [customColor, setCustomColor] = useState(currentColor)
-  const [position, setPosition] = useState({ top: 0, left: 0 })
   const pickerRef = useRef<HTMLDivElement>(null)
-
-  const updatePosition = useCallback(() => {
-    if (anchorRef.current) {
-      const rect = anchorRef.current.getBoundingClientRect()
-      setPosition({
-        top: rect.top + rect.height / 2 - 80,
-        left: rect.right + 8,
-      })
-    }
-  }, [anchorRef])
+  const [position, setPosition] = useState({ top: 0, left: 0 })
 
   useEffect(() => {
-    updatePosition()
-    window.addEventListener('resize', updatePosition)
-    window.addEventListener('scroll', updatePosition, true)
-    return () => {
-      window.removeEventListener('resize', updatePosition)
-      window.removeEventListener('scroll', updatePosition, true)
+    if (anchorRef.current && pickerRef.current) {
+      const anchor = anchorRef.current.getBoundingClientRect()
+      const pickerWidth = 208
+      let left = anchor.left + anchor.width / 2 - pickerWidth / 2
+      let top = anchor.bottom + 4
+
+      if (left < 8) left = 8
+      if (left + pickerWidth > window.innerWidth - 8) {
+        left = window.innerWidth - pickerWidth - 8
+      }
+
+      if (top + 120 > window.innerHeight) {
+        top = anchor.top - 120
+      }
+
+      setPosition({ top, left })
     }
-  }, [updatePosition])
+  }, [anchorRef])
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -50,61 +47,26 @@ export default function ListColorPicker({ currentColor, onColorSelect, onClose, 
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [onClose])
 
-  const content = (
+  return (
     <div
       ref={pickerRef}
-      className="fixed p-3 bg-[var(--color-bg)] rounded-xl shadow-lg border border-[var(--color-border)] z-50 w-44 animate-fade-in"
+      className="fixed z-[200] bg-coinbase-surface-card border border-coinbase-hairline rounded-coinbase-lg shadow-coinbase-hover p-3 animate-fade-in"
       style={{ top: position.top, left: position.left }}
-      onClick={(e) => e.stopPropagation()}
     >
-      <div className="grid grid-cols-4 gap-2">
-        {presetColors.map(color => (
+      <div className="grid grid-cols-6 gap-2">
+        {COLORS.map((color) => (
           <button
             key={color}
-            onClick={(e) => { e.stopPropagation(); onColorSelect(color); }}
-            className={`w-7 h-7 rounded-full transition-transform hover:scale-110 ${
-              color === currentColor ? 'ring-2 ring-[var(--color-accent)] ring-offset-1' : ''
+            onClick={() => onColorSelect(color)}
+            className={`w-7 h-7 rounded-coinbase-full transition-all ${
+              currentColor === color
+                ? 'ring-2 ring-coinbase-primary ring-offset-2 scale-110'
+                : 'hover:scale-110'
             }`}
             style={{ backgroundColor: color }}
           />
         ))}
       </div>
-      <div className="mt-3 pt-2 border-t border-[var(--color-border)]">
-        <button
-          onClick={(e) => { e.stopPropagation(); setShowCustom(!showCustom); }}
-          className="text-xs text-[var(--color-text-light)] hover:text-[var(--color-accent)] w-full text-center"
-        >
-          {showCustom ? '隐藏自定义' : '自定义颜色'}
-        </button>
-        {showCustom && (
-          <div className="mt-2 flex items-center gap-2">
-            <input
-              type="color"
-              value={customColor}
-              onChange={(e) => {
-                setCustomColor(e.target.value)
-                onColorSelect(e.target.value)
-              }}
-              className="w-8 h-8 rounded cursor-pointer border-0"
-            />
-            <input
-              type="text"
-              value={customColor}
-              onChange={(e) => {
-                const val = e.target.value
-                if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
-                  setCustomColor(val)
-                  onColorSelect(val)
-                }
-              }}
-              className="flex-1 px-2 py-1 text-xs border border-[var(--color-border)] rounded bg-[var(--color-bg)] text-[var(--color-text)]"
-              placeholder="#000000"
-            />
-          </div>
-        )}
-      </div>
     </div>
   )
-
-  return createPortal(content, document.body)
 }

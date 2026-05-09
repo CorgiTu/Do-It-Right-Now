@@ -1,52 +1,73 @@
-import type { ThemeColors } from '../types/theme'
+export interface ThemeColors {
+  bg: string
+  'bg-alt': string
+  text: string
+  'text-light': string
+  border: string
+  shadow: string
+  hover: string
+  accent: string
+  'accent-hover': string
+  'accent-light': string
+  ink: string
+  'muted-soft': string
+  'semantic-up': string
+  'semantic-down': string
+  'on-primary': string
+  'surface-strong': string
+}
 
-export const themes: ThemeColors[] = [
+export interface Theme {
+  id: string
+  name: string
+  colors: ThemeColors
+}
+
+export const themes: Theme[] = [
   {
-    name: '增强莫兰迪',
-    id: 'enhanced-morandi',
-    bg: '#f8f7f4',
-    bgAlt: '#f2f1ee',
-    text: '#5a5a5a',
-    textLight: '#9a9a9a',
-    border: '#e8e6e1',
-    shadow: 'rgba(0, 0, 0, 0.06)',
-    hover: '#f0eeea',
-    accent: '#7a9ba8',
-    accentHover: '#6b8a97',
-    accentLight: '#c5d9e2',
+    id: 'coinbase-light',
+    name: 'Coinbase',
+    colors: {
+      bg: '#FFFFFF',
+      'bg-alt': '#F7F7F7',
+      text: '#5B616E',
+      'text-light': '#7C828A',
+      border: '#DEE1E6',
+      shadow: 'rgba(0, 0, 0, 0.04)',
+      hover: '#EEF0F3',
+      accent: '#0052FF',
+      'accent-hover': '#003ECC',
+      'accent-light': 'rgba(0, 82, 255, 0.1)',
+      ink: '#0A0B0D',
+      'muted-soft': '#A8ACB3',
+      'semantic-up': '#05B169',
+      'semantic-down': '#CF202F',
+      'on-primary': '#FFFFFF',
+      'surface-strong': '#EEF0F3',
+    },
   },
   {
-    name: '明亮',
-    id: 'bright',
-    bg: '#ffffff',
-    bgAlt: '#f8f9fa',
-    text: '#2c3e50',
-    textLight: '#7f8c8d',
-    border: '#e9ecef',
-    shadow: 'rgba(0, 0, 0, 0.08)',
-    hover: '#f1f3f5',
-    accent: '#3498db',
-    accentHover: '#2980b9',
-    accentLight: '#d6eaf8',
-  },
-  {
-    name: '深色',
-    id: 'dark',
-    bg: '#1a1d21',
-    bgAlt: '#222529',
-    text: '#e8e8e8',
-    textLight: '#9e9e9e',
-    border: '#3a3d41',
-    shadow: 'rgba(0, 0, 0, 0.3)',
-    hover: '#2c3036',
-    accent: '#4da6ff',
-    accentHover: '#66b3ff',
-    accentLight: '#3d5a73',
+    id: 'coinbase-dark',
+    name: 'Coinbase Dark',
+    colors: {
+      bg: '#0A0B0D',
+      'bg-alt': '#16181C',
+      text: '#A8ACB3',
+      'text-light': '#7C828A',
+      border: '#2B2F36',
+      shadow: 'rgba(0, 0, 0, 0.2)',
+      hover: '#2B2F36',
+      accent: '#0052FF',
+      'accent-hover': '#3B82F6',
+      'accent-light': 'rgba(0, 82, 255, 0.15)',
+      ink: '#FFFFFF',
+      'muted-soft': '#5B616E',
+      'semantic-up': '#05B169',
+      'semantic-down': '#CF202F',
+      'on-primary': '#FFFFFF',
+      'surface-strong': '#2B2F36',
+    },
   },
 ]
 
-export const DEFAULT_THEME_ID = 'enhanced-morandi'
-
-export function getThemeById(id: string): ThemeColors | undefined {
-  return themes.find(theme => theme.id === id)
-}
+export const DEFAULT_THEME_ID = themes[0].id

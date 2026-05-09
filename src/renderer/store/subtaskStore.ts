@@ -7,6 +7,7 @@ interface SubtaskState {
   loadSubtasks: (taskId: string) => Promise<void>
   addSubtask: (taskId: string, content: string) => Promise<void>
   toggleSubtask: (subtaskId: string, taskId: string) => Promise<void>
+  updateSubtaskContent: (subtaskId: string, content: string) => Promise<void>
   deleteSubtask: (subtaskId: string, taskId: string) => Promise<void>
   reorderSubtasks: (taskId: string, subtasks: Subtask[]) => Promise<void>
   deleteAllSubtasksForTask: (taskId: string) => Promise<void>
@@ -51,6 +52,20 @@ export const useSubtaskStore = create<SubtaskState>((set, get) => ({
     }))
 
     await updateSubtask(subtaskId, { completed: newCompleted })
+  },
+
+  updateSubtaskContent: async (subtaskId: string, content: string) => {
+    await updateSubtask(subtaskId, { content })
+    set((state) => ({
+      subtaskMap: Object.fromEntries(
+        Object.entries(state.subtaskMap).map(([taskId, subtasks]) => [
+          taskId,
+          subtasks.map((st) =>
+            st.id === subtaskId ? { ...st, content, updatedAt: new Date().toISOString() } : st
+          ),
+        ])
+      ),
+    }))
   },
 
   deleteSubtask: async (subtaskId: string, taskId: string) => {
